@@ -1,21 +1,21 @@
-***Objective***
+##Objective
 Develop a stochastic risk analysis model to predict FMD vaccine numbers and an interactive user interface.
 
-Summary of Development
+##Summary of Development
 VADEMOS
 VADEMOS is the name of the FMD vaccine number estimation tool made by EuFMD. URL to VADEMOS: https://eufmd.shinyapps.io/vaccinationmodel Ask Hyojung L. or Sylvia E. regarding Login info.
 
-Language
+##Language
 R for modeling and interface development // Python for data cleaning
 
-Modeling tool
+##Modeling tool
 mc2d package in R to run a two-dimensional Monte-Carlo simulation
 
-Interactive interface
+##Interactive interface
 The developed model was distributed with a web-based interactive interface built with R Shiny package. The tool is currently deployed with Shinyapps.io, a cloud service for R products, with a free plan.
 
 
-Data
+##Data
 Parameters Data sources
 Parameter	Unit	Distribution	Source	Notes
 Population (LR, SR, P)	head	lognormal	FAOSTAT, Country's Statistical Institute	Future pops between 2021-2030 generated with a lognormal regression
@@ -29,14 +29,16 @@ Outbreak numbers	N	Poisson	Roadmap meetings, FAST reports, OIE WAHIS	No solid so
 Prophylactic vaccine coverage	%	BetaPERT	Q2 responses of Delphi questionnaire	PCP-stage specific parameter
 Outbreak coverage by vaccination	%	BetaPERT	Q3 responses of Delphi questionnaire	PCP-stage specific parameter
 Outbreak reduction	%	BetaPERT	Q4 responses of Delphi questionnaire	PCP-stage specific parameter
-Dictionary
+
+##Dictionary
 LR: Large Ruminants (Cattle)
 SR: Small Ruminants (Sheep+Goat)
 P: Pigs
 Focal points: Country representatives. We had asked to 3 Focal points (Georgia, Iran, Turkey) to provide us insights on their missing data a long time ago.
 Delphi questionnaire: Sarah W. and the team conducted Delphi survey to gather expert opinions on three unknown values (Prophylactic vaccine coverage, Outbreak coverage by vaccination, Outbreak reduction). In Round 1 of the Delphi, they didn't gather enough data to fit a BetaPERT distribution on it (e.g. lack of mode; the most probable value), therefore, the data was forced to have a BetaPERT using median as a replacement of the mode. In Round 2, only 2 responses were gathered and those were not parameterized to avoid bias.
 There are a lot of missing values due to the limited availability of country-specific data. For those parameters, default values were inserted as a place holder and a user should be able to modify those through a web-based interface.
-Countries
+
+##Countries
 Oct.2021 3 Asian countries (Georgia, Turkey, Iran) + 3 African countries (Ethoiopia, Uganda, Zambia)
 
 Jan.2022 11 Western Asian countries added (countries from the Western Asia region without historic PCP records were excluded)
@@ -44,10 +46,10 @@ Jan.2022 11 Western Asian countries added (countries from the Western Asia regio
 Total 72 countries available in VADEMOS 2022
 
 
-Validation of the data and outcome of the prediction
+##Validation of the data and outcome of the prediction
 Hosted a a workshop designed for veterinary services from 6 countries (Georgia, Iran, Turkey, Ethiopia, Uganda, Zambia) to evaluate the quality of the input data collated as well as the ouput produced by the model. Gathered feedback is available in a post-workshop report.
 
-Files
+##Files
 vaccinationmodel.R : Parameter processing & Monte-Carlo simulation
 predictPops.R : helper function for vaccinationmodel.R
 plotOutputs.R : output graphing
