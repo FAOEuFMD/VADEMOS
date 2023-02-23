@@ -1,0 +1,28 @@
+{
+    "id": "64D10417",
+    "path": null,
+    "project_path": null,
+    "type": "object_explorer",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1664377410662.0,
+    "source_on_save": false,
+    "relative_order": 8,
+    "properties": {
+        "id": "327502bb4ab7476a852715dde7f6122f",
+        "name": "world",
+        "title": "world",
+        "language": "R",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 3546074761668408886,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1664377410662,
+    "read_only": false,
+    "read_only_alternatives": []
+}

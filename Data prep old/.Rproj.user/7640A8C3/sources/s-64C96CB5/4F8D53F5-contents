@@ -1,0 +1,312 @@
+
+#########################################################
+##### Creation of countries database for VADEMOS ########
+#########################################################
+
+# # Loading libraries e working directory ####
+library(tidyverse)
+library(data.table)
+library(reshape)
+
+
+# Loading DB
+FAO.DB <- fread("FAOSTAT_data_3-8-2022.csv", header = TRUE, stringsAsFactors = FALSE) # From FAOSTAT: https://www.fao.org/faostat/en/#data/QCL
+# World_data <- fread("F:/PROGETTI/APHA/Module 2/Risk Ranking/Risk of Release of Exotic Disase in Italy Tool/Support Data/Worlddata.csv", header = TRUE, stringsAsFactors = FALSE)
+World_data <- fread("Worlddata.csv", header = TRUE, stringsAsFactors = FALSE)
+Agricultural.land <- fread("FAOSTAT_Agricultural_Land_3-9-2022.csv", header = TRUE, stringsAsFactors = FALSE)
+beef.dairy.cattle <- fread("FAOSTAT_beef_dairy_cattle.csv", header = TRUE, stringsAsFactors = FALSE)
+Country.list.VADEMOS <- fread("VADEMOS.country_list.csv", header = TRUE, stringsAsFactors = FALSE)
+
+# Select the countries for the dataset
+
+New.countries <- c("Egypt", "Qatar", "Yemen", "Palestine", "Afghanistan",	"Azerbaijan",	"Kyrgyzstan",	"Tajikistan",	"Turkmenistan",	"Uzbekistan")
+# ME.countries <- c("Egypt", "Qatar", "Yemen", "Palestine")
+# WE.countries <- c("Afghanistan",	"Azerbaijan",	"Kyrgyzstan",	"Tajikistan",	"Turkmenistan",	"Uzbekistan")
+
+# FAO.new.cn <- FAO.DB[which(FAO.DB$Area %in% c(ME.countries, WE.countries)),] # Select only the records of the chosen countries
+FAO.new.cn <- FAO.DB[which(FAO.DB$Area %in% New.countries),] # Select only the records of the chosen countries
+
+unique(FAO.new.cn$Area)
+
+World_data.ISO3 <- World_data[, c(4,6)] # Select only the column with the ISO3 code and name of the country
+
+FAO.new.cn <- merge(x = FAO.new.cn, y = World_data.ISO3, by.x = "Area", by.y = "NAME" , all.x = TRUE) # Add the ISO3 code from the world data file
+unique(FAO.new.cn$ISO3)
+
+
+
+# Create animal categories
+unique(FAO.new.cn$Item)
+
+Large.ruminants <- c("Cattle", "Buffaloes") # Category for Large Animals
+Small.ruminants <- c("Goats", "Sheep") # Category for Small Animals
+
+# FAO.new.cn <- FAO.new.cn[which(FAO.DB$Item %in% c(Large.ruminants, Small.ruminants, "Pigs")),] 
+
+FAO.new.cn <- subset(FAO.new.cn, Item %in% c(Large.ruminants, Small.ruminants, "Pigs")) # Subset only the species of interest
+
+FAO.new.cn$Species <- FAO.new.cn$Item # Create a new column for the species category 
+FAO.new.cn$Species[which(FAO.new.cn$Species %in% Large.ruminants)] <- "LR" 
+FAO.new.cn$Species[which(FAO.new.cn$Species %in% Small.ruminants)] <- "SR"
+FAO.new.cn$Species[which(FAO.new.cn$Species == "Pigs")] <- "P" # Remind that some countries do not have a record for pigs (i.e. Muslim countries)
+
+colnames(FAO.new.cn)[15] <- "Country_code"
+
+str(FAO.new.cn)
+
+# Creation of the prevpop DB for VADEMOS
+prevpop <- aggregate(Value ~ Country_code+Year+Species, FAO.new.cn, sum, na.rm = TRUE) # Sum the population value by country, year and species category.
+colnames(prevpop)[4] <- "Pop" # Change the name as in prevpop data
+
+prevpop <- prevpop[prevpop$Year>1992, ]
+
+
+Date <- Sys.time()
+Date <- format(Date, format="%y %m %d")
+write.csv(prevpop,paste("prevpop", Date, ".csv"), row.names = FALSE)
+
+# Creation of the data DB for VADEMOS
+
+VADEMOS.db <- subset(FAO.new.cn, Year > 2009) # Subset the database of the new countries by first data year used in VADEMOS (2011)
+VADEMOS.db <- subset(VADEMOS.db, Year < 2020) # Subset the database of the new countries by last data year used in VADEMOS (2019)
+
+VADEMOS.db <- VADEMOS.db %>% 
+  select(c('Area', 'Year', "Value", "Species", "Country_code" )) # Select only the parameters that are present in VADEMOS Database
+
+VADEMOS.db <- aggregate(Value ~ Area+Year+Species+Country_code, VADEMOS.db, sum, na.rm = TRUE) # Calculate the population by species category (i.e. LR = cattle + buffalo)
+
+colnames(VADEMOS.db)[1] <- "Country_name" # Change the name of the column regarding the country name
+colnames(VADEMOS.db)[5] <- "Pop"
+
+VADEMOS.db <- VADEMOS.db[,c(1,2,5,3,4)] # rearrange the name of the column
+
+Agricultural.land <- Agricultural.land %>%
+  select(c('Area', 'Year', "Value")) # Select only the parameters that are useful to add the Agricultural land 
+
+colnames(Agricultural.land)[3] <- "Agricultural land" # Change the name of the Value parameter
+Agricultural.land$`Agricultural land`<- Agricultural.land$`Agricultural land`*10 # Transform the unit of Agricultural land from 1000h to 100h 
+
+
+VADEMOS.db <- merge(x = VADEMOS.db, y = Agricultural.land, by.x = c("Country_name", "Year"), by.y = c("Area", "Year") , all.x = TRUE) # Add the Agricultural land value
+
+VADEMOS.db$LSD_agriculturalarea <- VADEMOS.db$Pop/VADEMOS.db$`Agricultural land` # Calculate the Livestock Stock Density 
+options(scipen=999) #scientific notation off
+
+VADEMOS.db <- VADEMOS.db[ , c(1,2,3,4,6,7,5)] # rearrange the column order
+
+# Adding the proportion of beef and dairy cattle
+
+prop.beef.dairy <- subset(beef.dairy.cattle, Item %in% c("Meat, cattle", "Milk, whole fresh cow"))
+prop.beef.dairy <- subset(prop.beef.dairy, Area %in% New.countries)
+
+prop.beef.dairy <- prop.beef.dairy[, c("Area", "Item", "Year", "Value")]
+prop.beef.dairy <- prop.beef.dairy %>% spread(Item, Value) # using "spread" function is calculated the number of heads for beef and dairy category
+
+names(prop.beef.dairy)[names(prop.beef.dairy) == "Meat, cattle"] <- "PopBeef"
+names(prop.beef.dairy)[names(prop.beef.dairy) == "Milk, whole fresh cow"] <- "PopDairy"
+
+VADEMOS.db <- merge(x = VADEMOS.db, y = prop.beef.dairy, by.x = c("Country_name", "Year") , by.y = c("Area", "Year"), all.x = TRUE) # Add the ISO3 code from the world data file
+
+VADEMOS.db$PopBeef[which(VADEMOS.db$Species != "LR")] <- NA
+VADEMOS.db$PopDairy[which(VADEMOS.db$Species != "LR")] <- NA
+
+# VADEMOS.db$PopBeef[which(VADEMOS.db$Species == "LR")] <- round(VADEMOS.db$Pop[which(VADEMOS.db$Species == "LR")] * 0.5,0)
+# VADEMOS.db$PopDairy[which(VADEMOS.db$Species == "LR")] <- round(VADEMOS.db$Pop[which(VADEMOS.db$Species == "LR")] * 0.5,0)
+
+VADEMOS.db$PropDairy <- VADEMOS.db$PopDairy/(VADEMOS.db$PopBeef + VADEMOS.db$PopDairy)
+VADEMOS.db$PropBeef <- VADEMOS.db$PopBeef/(VADEMOS.db$PopBeef + VADEMOS.db$PopDairy)
+
+# VADEMOS.db$PropDairy <- 0.5
+# VADEMOS.db$PropBeef <- 0.5
+
+# Adding the population growth
+
+population.growth.list <- list() # create a list for the PopGrowth parameters
+
+for (i in 1:length(New.countries))  { # This loop produces the population growth for each species
+  tmp <- VADEMOS.db[, c("Country_name", "Year", "Species","Pop")]
+  tmp <- subset(tmp, Country_name == New.countries[i])
+  tmp <- tmp %>% spread(Species, Pop)
+  
+  if ( colnames(tmp)[4] != "P") {
+    tmp$P <- NA
+    tmp$P <- 0
+    tmp[,c(1,2,3,5,4)]
+    } 
+  
+  tmp$LR.diff <- c(0 ,diff(tmp$LR))
+  tmp$LR.diff <- c(0,tmp$LR.diff[2:length(tmp$LR.diff)]/tmp$LR[1:length(tmp$LR)-1])
+  
+  tmp$SR.diff <- c(0 ,diff(tmp$SR))
+  tmp$SR.diff <- c(0,tmp$SR.diff[2:length(tmp$SR.diff)]/tmp$SR[1:length(tmp$SR)-1])
+  
+  tmp$P.diff <- c(0 ,diff(tmp$P))
+  tmp$P.diff <- c(0,tmp$P.diff[2:length(tmp$P.diff)]/tmp$P[1:length(tmp$P)-1])
+  
+  
+  population.growth.list[[i]] <- tmp
+  
+  # paste0("population.growth", "1") <- tmp
+  
+}
+
+all.population.growth = do.call(rbind, population.growth.list)
+
+all.population.growth$P.diff <- replace(all.population.growth$P.diff, all.population.growth$P.diff == "NaN", 0)
+
+all.population.growth <- all.population.growth[ ,c(1,2,6:8) ]
+
+all.population.growth <- melt(all.population.growth, id=c("Country_name","Year"))
+
+all.population.growth$variable <-as.character(all.population.growth$variable)
+
+all.population.growth$variable[all.population.growth$variable == "LR.diff"] <- "LR"
+all.population.growth$variable[all.population.growth$variable == "SR.diff"] <- "SR"
+all.population.growth$variable[all.population.growth$variable == "P.diff"] <- "P"
+
+colnames(all.population.growth)[4] <- "PopGrowth"
+colnames(all.population.growth)[3] <- "Species"
+
+VADEMOS.db <- merge(x = VADEMOS.db, y = all.population.growth, by.x = c("Country_name", "Year", "Species"), by.y = c("Country_name", "Year", "Species") , all.x = TRUE) 
+
+
+VADEMOS.db <- subset(VADEMOS.db, Year > 2010)  
+
+
+
+VADEMOS.db <- VADEMOS.db[ , c(1,2,3,8,9,4,12,10,11,5,6,7)] # Rearrange the columns in the correct order for VADEMOS
+
+
+
+# Attribute.region <- function(x) {
+#    vector <- 1:length(x)
+#    
+#  for (i in 1:length(x))  {
+#      if (x[i] %in% c(ME.countries,WE.countries))  {
+#    vector[i] <- "Asia"
+#     }
+#  }
+#    }
+
+
+Attribute.region <- function(x) {
+  vector <- 1:length(x)
+  # vector <- NA
+  for (i in 1:length(x))  {
+    if (x[i] %in% Country.list.VADEMOS$Country)  {
+        vector[i] <- Country.list.VADEMOS$Region[which(x[i] == Country.list.VADEMOS$Country )]
+    }
+  }
+  return(vector)
+} # Function to attribute the region
+
+VADEMOS.db$Region <-  Attribute.region(VADEMOS.db$Country_name) # Region attribution
+
+
+Attribute.subregion <- function(x) {
+  vector <- 1:length(x)
+  # vector <- NA
+  for (i in 1:length(x))  {
+    if (x[i] %in% Country.list.VADEMOS$Country)  {
+      vector[i] <- Country.list.VADEMOS$Area[which(x[i] == Country.list.VADEMOS$Country )]
+    }
+  }
+  return(vector) # Function to attribute the subregion
+}
+
+VADEMOS.db$Subregion <-  Attribute.subregion(VADEMOS.db$Country_name) #Subregion attribution
+
+# Add parameters with fixed values
+VADEMOS.db$PCP <- 2 # PCP assumed to be null but it has to modified manually
+VADEMOS.db$VaccinationArea <- 314
+VADEMOS.db$DiffByRegion <- ""
+VADEMOS.db$SubnationalRegion <- ""
+VADEMOS.db$PopPropByRegion <- ""
+
+# VADEMOS.db$VaccineSchedule_AS <- 2
+# VADEMOS.db$VaccineSchedule_YS <- 1
+
+VADEMOS.db$VaccineSchedule_AS[which(VADEMOS.db$Species == "LR")] <- 2
+VADEMOS.db$VaccineSchedule_AS[which(VADEMOS.db$Species == "SR")] <- 1
+
+VADEMOS.db$VaccineSchedule_YS[which(VADEMOS.db$Species == "LR")] <- 2
+VADEMOS.db$VaccineSchedule_YS[which(VADEMOS.db$Species == "SR")] <- 1
+
+VADEMOS.db$PropYS <- 0.3
+VADEMOS.db$PropSmall <- NA
+
+VADEMOS.db$TotalOutbreaks <- 0 # By default, the outbreaks will be "zero" but the correct values will be added manually
+
+No.pig.countries <- function(x) {
+  Vademos <- unique(x[,c(1,3)])
+  Vademos <- unique(Vademos[which(Vademos$Species == "P"),])
+  country.no.pigs <- New.countries[-which(New.countries %in% Vademos$Country_name)]
+    return(country.no.pigs) # Function to find the countries that do not have pig records (pig records have to be present in the file)
+  }
+
+country.no.pigs <- No.pig.countries(VADEMOS.db) # Vector with the countries with no pigs records
+
+New.pig.rows <-data.frame(matrix(ncol = length(colnames(VADEMOS.db)), nrow = 0)) # Create a new Data frame similar to Vademos DB but empty
+colnames(New.pig.rows) <- colnames(VADEMOS.db)
+
+for (i in 1:length(country.no.pigs))  { # Function to create pig records for the countries do not have them
+  country <- country.no.pigs[i]
+  tmp <- subset(VADEMOS.db, Country_name == country & Species == "SR")
+  tmp$Pop <- 1 # Pig population is assumed to be "1"
+  tmp$Species <- "P"
+  tmp$LSD_agriculturalarea <- tmp$Pop/tmp$`Agricultural land`
+  tmp$VaccineSchedule_AS <- NA
+  tmp$VaccineSchedule_YS <- NA
+  
+  New.pig.rows <- rbind(New.pig.rows,tmp)
+}
+
+VADEMOS.db <- rbind(VADEMOS.db,New.pig.rows)
+
+
+New.records <- data.frame(matrix(ncol = length(colnames(VADEMOS.db)), nrow = 0))
+colnames(New.records) <- colnames(VADEMOS.db)
+
+
+for (i in 1:length(New.countries))  { # Function to create blank records for predicted years
+  
+  tmp <- data.frame(matrix(ncol = length(colnames(VADEMOS.db)), nrow = 11*3))
+  colnames(tmp) <- colnames(VADEMOS.db)
+  country <- New.countries[i]
+  tmp$Country_name <-country
+  
+  tmp$Year <- seq(from = 2020, to = 2030, by = 1)
+  
+  tmp$Species <- rep(c("LR", "SR", "P"),11)
+  
+  country_code <- unique(VADEMOS.db$Country_code[which(VADEMOS.db$Country_name == country )])
+  tmp$Country_code <- country_code
+  
+  region <- unique(VADEMOS.db$Region[which(VADEMOS.db$Country_name == country )])
+  tmp$Region <- region
+  
+  subregion <- unique(VADEMOS.db$Subregion[which(VADEMOS.db$Country_name == country )])
+  tmp$Subregion <- subregion
+  
+  tmp$VaccinationArea <- 314
+  
+  tmp$VaccineSchedule_AS[which(tmp$Species == "LR")] <- 2
+  tmp$VaccineSchedule_AS[which(tmp$Species == "SR")] <- 1
+  
+  tmp$VaccineSchedule_YS[which(tmp$Species == "LR")] <- 2
+  tmp$VaccineSchedule_YS[which(tmp$Species == "SR")] <- 1
+  
+  tmp$PCP <- 2
+  tmp$PropYS <- 0.3
+  
+  
+  New.records <- rbind(New.records,tmp)
+}
+
+
+VADEMOS.db.DEF <- rbind(VADEMOS.db, New.records)
+
+VADEMOS.db.DEF <- VADEMOS.db.DEF[, c(1,2,6, 4, 5, 3, 7:24)]
+
+write.csv(VADEMOS.db.DEF,paste("data", Date, ".csv"), row.names = FALSE, na = "")
+

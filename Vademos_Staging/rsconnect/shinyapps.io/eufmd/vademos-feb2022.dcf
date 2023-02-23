@@ -1,0 +1,14 @@
+name: vademos-feb2022
+title: vademos-feb2022
+username:
+account: eufmd
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5666725
+bundleId: 5585519
+url: https://eufmd.shinyapps.io/vademos-feb2022/
+when: 1645020140.69349
+lastSyncTime: 1645020140.69349
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: data_Dec2021.csv

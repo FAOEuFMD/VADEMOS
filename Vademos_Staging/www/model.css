@@ -1,0 +1,26 @@
+
+/* NavbarPage */
+.navbar {background-color: #16834c; border-color: #16834c;}
+.navbar-default .navbar-brand {color: white;}
+.navbar-default .navbar-brand:hover {color: #073f23;}
+.navbar-default .navbar-nav > li > a {color: white;}
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:focus,
+.navbar-default .navbar-nav > .active > a:hover {color: white; background-color: #0b4b2b;}
+.navbar-default .navbar-nav > li > a:hover {color: white; background-color:#16834c;text-decoration:underline;}
+.navbar-brand {width: 360px;} /* space between the logo and the menu bar */
+
+/* Tabs */
+.tabbable > .nav > li > a {color: #073f23;}
+.tabbable > .nav > li[class=active] > a,
+.tabbable > .nav > li[class=active] > a:focus,
+.tabbable > .nav > li[class=active] > a:hover {color: white; background-color:#073f23;}
+
+.tabbable > .nav > li > a:hover {color: white; background-color:#073f23;}
+
+/* Input widgets */
+/* this has been dealt within the app.R using 'chooseSliderskin' function */
+
+
+/* Font color change for div id "help_region_selection" */
+.help_texts {color: #ff0000; font-style: italic;}

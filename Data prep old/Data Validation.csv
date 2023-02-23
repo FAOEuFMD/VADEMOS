@@ -1,0 +1,73 @@
+Region,Area,Roadmap,Country,VADEMOS
+Asia,South Asia,SAARC,Bangladesh,NO
+Asia,South Asia,SAARC,Bhutan,NO
+Asia,South Asia,SAARC,Sri Lanka,NO
+Asia,South Asia,SAARC,Nepal,NO
+Asia,South Asia,SAARC,India,NO
+Asia,Middle East,ME,Bahrain,YES
+Asia,Middle East,ME,Egypt,NO
+Asia,Middle East,ME,Iraq,YES
+Asia,Middle East,ME,Jordan,YES
+Asia,Middle East,ME,Lebanon,YES
+Asia,Middle East,ME,Saudi Arabia,YES
+Asia,Middle East,ME,Syria,YES
+Asia,Middle East,ME,UAE,YES
+Asia,Middle East,ME,Oman,YES
+Asia,Middle East,ME,Qatar,NO
+Asia,Middle East,ME,Yemen,NO
+Asia,Middle East,ME,Kuwait,YES
+Asia,Middle East,ME,Palestine,NO
+Africa,Southern Africa,SADC,Angola,NO
+Africa,Southern Africa,SADC,Botswana,NO
+Africa,Southern Africa,SADC,Comoros,NO
+Africa,Southern Africa,SADC,DRC,NO
+Africa,Southern Africa,SADC,Malawi,NO
+Africa,Southern Africa,SADC,Mozambique,NO
+Africa,Southern Africa,SADC,Tanzania,NO
+Africa,Southern Africa,SADC,Namibia (zone),NO
+Africa,Southern Africa,SADC,Zambia,YES
+Africa,Southern Africa,SADC,Zimbabwe,NO
+Africa,East Africa,EA,South Sudan,NO
+Africa,East Africa,EA,Sudan,NO
+Africa,East Africa,EA,Ethiopia,YES
+Africa,East Africa,EA,Burundi,NO
+Africa,East Africa,EA,Djibouti,NO
+Africa,East Africa,EA,Eritrea,NO
+Africa,East Africa,EA,Somalia,NO
+Africa,East Africa,EA,Uganda,YES
+Africa,East Africa,EA,Rwanda,NO
+Africa,East Africa,EA,Kenya,NO
+Africa,Central Africa,CA,Central African Republic,NO
+Africa,Central Africa,CA,Congo,NO
+Africa,Central Africa,CA,Equatorial Guinea,NO
+Africa,Central Africa,CA,Sao Tome et Principe,NO
+Africa,Central Africa,CA,Chad,NO
+Africa,Central Africa,CA,Gabon,NO
+Africa,Central Africa,CA,Cameroon,NO
+Africa,Western Africa,WA,Gambia,NO
+Africa,Western Africa,WA,Liberia,NO
+Africa,Western Africa,WA,Mauritania,NO
+Africa,Western Africa,WA,Cabo Verde,NO
+Africa,Western Africa,WA,Benin,NO
+Africa,Western Africa,WA,Guinea Bissau,NO
+Africa,Western Africa,WA,Burkina Faso,NO
+Africa,Western Africa,WA,Côte d’Ivoire,NO
+Africa,Western Africa,WA,Ghana,NO
+Africa,Western Africa,WA,Guinea,NO
+Africa,Western Africa,WA,Mali,NO
+Africa,Western Africa,WA,Niger,NO
+Africa,Western Africa,WA,Nigeria,NO
+Africa,Western Africa,WA,Senegal,NO
+Africa,Western Africa,WA,Sierra Leone,NO
+Africa,Western Africa,WA,Togo,NO
+Asia,West Eurasia,WE,Afghanistan,NO
+Asia,West Eurasia,WE,Azerbaijan,NO
+Asia,West Eurasia,WE,Georgia,YES
+Asia,West Eurasia,WE,Kyrgyzstan,NO
+Asia,West Eurasia,WE,Turkey (Anatolia),YES
+Asia,West Eurasia,WE,Armenia,YES
+Asia,West Eurasia,WE,Iran,YES
+Asia,West Eurasia,WE,Pakistan,YES
+Asia,West Eurasia,WE,Tajikistan,NO
+Asia,West Eurasia,WE,Turkmenistan,NO
+Asia,West Eurasia,WE,Uzbekistan,NO

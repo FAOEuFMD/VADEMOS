@@ -1,0 +1,87 @@
+# Select only the records of the chosen variable
+
+DB <- DB[which(DB$variable %in% variable),] 
+
+`%!in%` <- Negate(`%in%`)
+missingcountries<- enrolments[which(enrolments$country_name %!in% enrolements$country_name),] 
+
+# remove shapes that are not in a state (e.g., Guam)
+shapes <- shapes[!is.na(shapes@data$STATENAME),] 
+
+
+
+# Change column name
+
+colnames(World_data)[6] <- "Country"
+
+
+#Recode
+
+World_data$NAME <- recode(World_data$NAME, "Cabo Verde" = "Cape Verde")
+
+#Subset by columns
+
+FAO.DB <-FAO.DB[, c(4,8,10,12 )]
+
+#Remove string from a column with textnumbers
+
+PCP$PCP <- as.numeric(gsub("[a-zA-Z ]", "", PCP$PCP))
+
+#Remove -sing
+PCP$PCP <- abs(PCP$PCP)
+
+
+#change null to 0
+PCP$PCP[is.na(PCP$PCP)] <- 0
+
+#subset
+
+VADEMOS.db <- subset(VADEMOS.db, Year > 2009)
+
+#aggreagate values + keeping what columns you need also
+VADEMOS.db <- aggregate(Value ~ Country+Year+Species+Country_code+LON+LAT, VADEMOS.db, sum, na.rm = TRUE)
+
+
+#rearrange columns
+VADEMOS.db <- VADEMOS.db[,c(1,5,2,7,4,6,3)] # rearrange the name of the column
+
+#transform colum with mutlipication
+Agricultural.land$Agricultural_land<- Agricultural.land$Agricultural_land*10
+
+#add value to a specific row variable
+VADEMOS.db$VaccineSchedule_AS[which(VADEMOS.db$Species == "LR")] <- 2
+
+#when spread() doesnt work for repeated keys
+df %>% 
+  group_by_at(vars(-age)) %>%  # group by everything other than the value column. 
+  mutate(row_id=1:n()) %>% ungroup() %>%  # build group index
+  spread(key=gender, value=age) %>%    # spread
+  select(-row_id)  # drop the index
+  
+  or
+  
+  tmp %>% 
+      distinct() %>% 
+      spread(Species, POP) 
+      
+#if melt does not work name dont match
+tmp<-as.data.frame(tmp)
+tmp<-melt(tmp, id=c("Country_name", "Year"))
+
+
+#group by
+group_by(df)
+
+#merge with no suffix
+suffix= c('.a', ''))%>%
+  setNames(gsub('\\.a$', '',names(.)))
+  
+  
+  #print full or as many lineas as indicated
+  
+  print(my_tibble, n = 20)     
+
+
+
+
+ 

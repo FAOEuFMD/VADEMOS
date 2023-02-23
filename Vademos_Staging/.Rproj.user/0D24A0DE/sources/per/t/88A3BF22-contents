@@ -1,0 +1,174 @@
+tool <- function() {
+  pageWithSidebar(  
+    # App title ----,
+    headerPanel(
+      div(h3("VADEMOS"),
+          h3("Vaccine Demand Estimation tool - FMD"), br())
+    ),
+    
+    # ----------------------------------
+    # Sidebar panel for input parameters
+    sidebarPanel(
+      tabsetPanel(
+        tabPanel("Help",
+                 includeHTML("./help.Rhtml")
+        )
+    )
+    ), #SidebarPanel
+    
+    # Main panel for displaying modeling outputs ----
+    mainPanel(
+      # Output1: Tabs to show estimated future inputs: populations, outbreaks, pcp projections
+      tabsetPanel(
+        id="maintabset",
+        # 1 - SELECT INPUT PARAMETERS
+        tabPanel("Parameters",
+                 column(12,
+                 br(),
+                 # ----------------------------------
+                 # 1 - SELECT COUNTRY AND YEAR TO PREDICT
+                 column(12,
+                 wellPanel(
+                   fluidRow(
+                     column(10, h4("STEP 1: Select a country and year"), br()),
+                     column(4, selectInput("country_selected", label = NULL, choices = unique(data$Country_name), selected=NULL)),
+                     
+                     # A conditional panel to choose subnational regions if Turkey has been selected
+                     conditionalPanel(condition = "input.country_selected == 'Turkey'",
+                                      column(4, selectInput("subnational_selected", label = NULL, choices = unique(data$SubnationalRegion), selected="Region"))
+                     ), # conditionalPanel
+                     
+                     column(4, selectInput("year_selected", label = NULL, choices = unique(data[data$Year > 2020, "Year"]))),
+                   
+                     # Text appears below dropdown menus
+                     conditionalPanel(condition = "input.country_selected == 'Turkey'",
+                                      column(10,
+                                           div(class="help_texts", h5("There are more than 1 FMD-PCP stages within this country. Please select a region to proceed.")))
+                   ) # conditionalPanel
+                   ) # fluid row
+                 ) # well Panel
+                 )
+                 ),
+                 column(12,
+                 # ----------------------------------
+                 # 2 - DATATABLE TO TOGGEL INPUTS
+                 shinyjs::useShinyjs(), # shinyjs and id of this part will be linked to the 'reset button'
+                 id = "inputs1",
+                 
+                 column(12,
+                 wellPanel(
+                     fluidRow(
+                     column(10, h4("STEP 2: Define prophylactic and Emergency vaccination plan"), br()),
+                     column(10, h4("How many times a year preventive vaccines are scheduled?")),
+                     column(4, uiOutput("vschedule_lr_as"), align = "center"),
+                     column(4, uiOutput("vschedule_sr_as"), align = "center"),
+                     column(4, uiOutput("vschedule_p_as"), align = "center"),
+                     column(10, br()),
+                     column(4, uiOutput("vschedule_lr_ys", align = "center"), br()),
+                     column(4, uiOutput("vschedule_sr_ys", align = "center"), br()),
+                     column(4, uiOutput("vschedule_p_ys", align = "center"), br()),
+                     column(10, br()),
+                     
+                     column(10, h4("Population proportion of youngstocks")),
+                     column(4, uiOutput("ysproplr", align = "center"), br()),
+                     column(4, uiOutput("yspropsr", align = "center"), br()),
+                     column(4, uiOutput("yspropp", align = "center"), br()),
+                     column(10, br()),
+                     
+                     column(10, h4("Sector proportions of Large ruminants")),
+                     column(4, uiOutput("sectorpropdairy", align = "center"), br()),
+                     column(4, uiOutput("sectorpropbeef", align = "center"), br()),
+                     column(4, uiOutput("sectorpropsmall", align = "center"), br()),
+                     # Text appears below dropdown menus
+                     conditionalPanel(condition = "input.sectorpropdairy+input.sectorpropbeef+input.sectorpropsmall!=100",
+                                      column(10,
+                                             div(class="help_texts", h5("These proportions combined must be 100%")))
+                     ) # conditionalPanel
+                     )#fluid Row
+                   ) #well panel
+                  ),
+        
+                   column(12),
+                   column(12,
+                   wellPanel(
+                     fluidRow(
+                     column(10, h4("STEP 3: Project PCP-FMD, Population, Outbreaks and Emergency vaccination plan")),
+                            br(),
+                     column(12, align = "center", DTOutput("inputtable"), style = "font-size:110%"),
+                     column(12, align = "right", helpText("* Double click to edit values"))
+                     ) #fluidRow
+                   ), #well panel
+                     column(4, plotOutput("pcps")),
+                     column(4, plotOutput("pops")),
+                     column(4, plotOutput("outbreaks"))
+                   ),
+                   br(),
+                   column(12),
+                   column(12,
+                          wellPanel(
+                            fluidRow(
+                              column(10, h4("STEP 4: Define PCP-dependent vaccine coverage"), br()),
+                              column(6, uiOutput("pcp_selected"), br()),
+                              column(10, h4("% of livestocks most likely covered by Prophylactic vaccination")),
+                              column(4, uiOutput("prophylactic_vc_lr", align = "center"), br()),
+                              column(4, uiOutput("prophylactic_vc_sr", align = "center"), br()),
+                              column(4, uiOutput("prophylactic_vc_p", align = "center"), br() ),
+                              column(10, h4("% FMD outbreaks covered by emergency vaccination")),
+                              column(4, uiOutput("outbreak_vc_lr", align = "center"), br()),
+                              column(4, uiOutput("outbreak_vc_sr", align = "center"), br()),
+                              column(4, uiOutput("outbreak_vc_p", align = "center"), br())
+                            ) #fluidRow
+                          ) #well panel
+                   )
+                   ), # column binding input id 'inputs'
+                 br(),
+                
+                 column(12, br()),
+                 column(12, br()),
+               
+                 # ----------------------------------
+                 # ACTION BUTTONS
+                 fluidRow(
+                   column(2),
+                   # Submit button
+                   column(5,
+                          actionButton("updatebutton", "Get result", class = "btn btn-primary",
+                                       icon = icon("arrow-alt-circle-right"),
+                                       style = "background-color: #073f23; border-color:transparent")),
+                   column(5, actionButton("resetbutton", "Reset inputs", icon = icon("refresh"))),
+                   column(2)
+                 ) # fluidRow
+                ), # tabPanel
+        
+        
+        
+        # Tab 3. RESULT SECTION
+        tabPanel("Result",
+                 fluidRow(
+                   column(10, dataTableOutput("resulttable"), style = "font-size:102%"),
+                   column(12, br()),
+                   
+                   column(5, plotOutput('trajresult')),
+                   column(5, plotOutput('histresult')),
+                   column(12, br()), # Rob (16/02/22)
+                   
+                   column(5, plotOutput('histresultLR')), # # Rob (16/02/22)
+                   column(5, plotOutput('histresultSR')), # # Rob (16/02/22)
+                   column(12, br()), # # Rob (16/02/22)
+                   
+                   column(5, plotOutput('histresultP')), # # Rob (16/02/22)
+                   column(5, plotOutput('histresultEV')), # # Rob (16/02/22)
+                   column(12, br()), # # Rob (16/02/22)
+                   
+                   column(10, dataTableOutput("resulttable2"), style = "font-size:102%"), # # Rob (16/02/22)
+                   column(12, br()), # # Rob (16/02/22)
+                   
+                   column(6, helpText("")),
+                   column(12, br())
+                    ) #fluidRow
+                 
+        ) # tabPanel
+      ) # tabset panel
+    ) # mainpanel
+  ) # pageWithSidebar
+}

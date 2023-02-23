@@ -1,0 +1,116 @@
+#####################################################################################################
+## Predict populations
+## Initial development with simple lognormal regression
+## hyojung.lee@fao.org - Mar.2021 ~
+#####################################################################################################
+
+###################################################
+# 0 - Load libraries
+###################################################
+library(dplyr)
+library(tidyr)
+
+###################################################
+# 1 - Source files
+###################################################
+# data <- read.csv('data.csv')
+# delphi <- read.csv('delphi-round1.csv')
+# prevpops <- read.csv('prevpop_Dec2021.csv')
+# prevpops <- read.csv('prevpop_Mar2022.csv')
+#prevpops <- read.csv('prevpop_Mar2022 18 03 22.csv', sep = ",")
+prevpops <- read.csv('newprevpop3.csv', sep = ",")
+
+###################################################
+# 2 - Functions to prepare input parameters
+###################################################
+# countrycode <- "IRN"
+# year_to_predict <- 2023
+
+###################################################
+# Functions
+###################################################
+predict.pops <- function(df, countrycode, year_to_split, year_to_predict, subnational=NA){
+  # Initiate a new dataframe where to collect the future data
+  # future dataset will be populated with predicted values for params
+  pops_predicted <- data.frame()
+  
+  # Select prev pop data by country
+  prevpops_c <- prevpops[prevpops$Country_code == countrycode, ]
+  
+  # Split data by subnational if exist
+  if(is.na(subnational)){
+    invisible
+  } else {
+    prevpops_c$Pop <- prevpops_c$Pop * unique(df$PopPropByRegion)
+  }
+  
+  for (s in c("LR", "P", "SR")){
+    df_cs <- df[df$Species == s, ]
+    
+    ###################################################
+    # Data split by year
+    ################################################### 
+    # training: Year < year_of_split
+    # testing: year_of_split =< Year =< year_of_split+3 years
+    # prediction: Year <= year_to_predict
+    df_train <-   df_cs[df_cs$Year <= year_to_split, ]
+    #df_test <- df_cs[(df_cs$Year >= year_to_split) & (df_cs$Year <= year_to_split+2), ]
+    df_future <-  df_cs[(df_cs$Year > year_to_split) & (df_cs$Year <= year_to_predict), ]
+    
+    # Append census data in 1993-2010 to enlarge the training set
+    prevpops_cs <- prevpops_c[prevpops_c$Year>1992 & prevpops_c$Species==s, ]
+    df_train <- bind_rows(prevpops_cs, df_train) # training year from 1993 up to year to split
+    
+    # order by year
+    df_train[order(df_train$Year),]
+    
+    ###################################################
+    # Population - lognormal regression
+    # lm on logarithm of each specie's population
+    ###################################################
+    # If only NAs are available for a species,
+    # pass that training using 'invisible()'
+    if (all(is.na(df_train[df_train$Species == s, "Pop"]))){
+      Pop_na <- data.frame(Pop_predicted=NA, Year=unique(df_future$Year), Species=s)
+      pops_predicted <- rbind(pops_predicted, Pop_na)
+    } else {
+      lm.fit = stats::lm(log(Pop) ~ Year,
+                         na.action=na.exclude,
+                         data = df_train[is.finite(log(df_train$Pop)), ]) # fit a simple linear regression model
+      print(summary(lm.fit))
+      #print(plot(lm.fit, main="Log-normal regression Total Population"))
+      
+      # Check normality of residuals
+      #d<-density(lm.fit[["residuals"]])
+      #print(plot(d,main="Residual KDE Plot - Pop",xlab="Residual value"))
+      
+      # Test
+      # pred <- predict(lm.fit,
+      #                 newdata = df_test,
+      #                 na.action=na.exclude,
+      #                 interval = "confidence")
+      #summary(pred)
+      
+      # Generate new predictions for the future years
+      Pop_future <- predict(lm.fit,
+                            newdata= df_future,
+                            na.action=na.exclude,
+                            interval="confidence")
+      Pop_future <- data.frame(exp(Pop_future[, "fit"]))
+      Pop_future$Year <- df_future$Year
+      Pop_future$Species <- s
+      names(Pop_future) <- c("Pop_predicted", "Year", "Species")
+      
+      pops_predicted <- rbind(pops_predicted, Pop_future)
+    } # if-else on pop.na end
+  } # for loop end
+  return(pops_predicted)
+} # function end
+
+
+get.df.with.pop.predicted <<- function(df.c, countrycode, year_to_split, year_to_predict, subnational=NA){
+  pops_predicted <- predict.pops(df.c, countrycode, year_to_split, year_to_predict, subnational) # Predict pops
+  # Merge the prediction to the original country"s data
+  df_pred <- merge(df.c, pops_predicted, by = c("Year", "Species"), all.y = TRUE)
+  return(df_pred)
+} # function end

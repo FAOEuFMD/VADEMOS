@@ -1,0 +1,26 @@
+{
+    "id": "5D447DBD",
+    "path": "D:/PROGETTI/FAO/VADEMOS/vademos-test/predictPops.R",
+    "project_path": "predictPops.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1646212121946.0,
+    "source_on_save": false,
+    "relative_order": 5,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "19,5",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1647537036,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1647537034035,
+    "read_only": false,
+    "read_only_alternatives": []
+}
