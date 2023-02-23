@@ -1,62 +1,77 @@
-##Objective
+## Objective
 Develop a stochastic risk analysis model to predict FMD vaccine numbers and an interactive user interface.
 
-##Summary of Development
-VADEMOS
-VADEMOS is the name of the FMD vaccine number estimation tool made by EuFMD. URL to VADEMOS: https://eufmd.shinyapps.io/vaccinationmodel Ask Hyojung L. or Sylvia E. regarding Login info.
+## Summary of Development
 
-##Language
+### VADEMOS
+*VADEMOS* is the name of the FMD vaccine number estimation tool made by EuFMD.
+URL to VADEMOS: https://eufmd.shinyapps.io/vaccinationmodel
+Ask Hyojung L. or Sylvia E. regarding Login info.
+
+### Language
 R for modeling and interface development // Python for data cleaning
 
-##Modeling tool
+### Modeling tool
 mc2d package in R to run a two-dimensional Monte-Carlo simulation
 
-##Interactive interface
-The developed model was distributed with a web-based interactive interface built with R Shiny package. The tool is currently deployed with Shinyapps.io, a cloud service for R products, with a free plan.
+### Interactive interface
+The developed model was distributed with a web-based interactive interface built with R Shiny package. The tool is currently deployed with [Shinyapps.io](https://www.shinyapps.io), a cloud service for R products, with a free plan.
+
+### Pending actions
+1. To improve the visualization of the 'result' panel - Catch up with Roberto C. about the progress
+2. To provide a regional summation of the predicted vaccine values - Consult with Bouda V.
+3. To validate the model input as well as the results for the 11 West Asian countries - Consult with Bouda V.
+4. To improve forecasting accuracy of parameters by integrating user feedbacks
 
 
-##Data
-Parameters Data sources
-Parameter	Unit	Distribution	Source	Notes
-Population (LR, SR, P)	head	lognormal	FAOSTAT, Country's Statistical Institute	Future pops between 2021-2030 generated with a lognormal regression
-Growth Rate (LR, SR, P)	%	normal	Calculated data	Python
-PCP Stages	.	.	Collated from different sources, etc. Roadmap meetings, FAST reports	.
-Livestock Density (LR, SR, P)	head/km^2	lognormal	FAOSTAT + calculated data	Population divided by agricultural area(km^2)
-Sector Proportion	%	normal	FAOSTAT, Country's Statistical Institue, Focal points	No exact data available; deduced by the number of slaughtered animals per sector
-Age Proportion	%	normal	Country's Statistical Institue, Focal points	No solid sources available; default value deduced from Turkey's data
-Vaccinatnion area (ring)	km^2	.	Focal points	Emergency vaccination ring area from the epicenter
-Outbreak numbers	N	Poisson	Roadmap meetings, FAST reports, OIE WAHIS	No solid sources available; intensive data mining required
-Prophylactic vaccine coverage	%	BetaPERT	Q2 responses of Delphi questionnaire	PCP-stage specific parameter
-Outbreak coverage by vaccination	%	BetaPERT	Q3 responses of Delphi questionnaire	PCP-stage specific parameter
-Outbreak reduction	%	BetaPERT	Q4 responses of Delphi questionnaire	PCP-stage specific parameter
+## Data
 
-##Dictionary
-LR: Large Ruminants (Cattle)
-SR: Small Ruminants (Sheep+Goat)
-P: Pigs
-Focal points: Country representatives. We had asked to 3 Focal points (Georgia, Iran, Turkey) to provide us insights on their missing data a long time ago.
-Delphi questionnaire: Sarah W. and the team conducted Delphi survey to gather expert opinions on three unknown values (Prophylactic vaccine coverage, Outbreak coverage by vaccination, Outbreak reduction). In Round 1 of the Delphi, they didn't gather enough data to fit a BetaPERT distribution on it (e.g. lack of mode; the most probable value), therefore, the data was forced to have a BetaPERT using median as a replacement of the mode. In Round 2, only 2 responses were gathered and those were not parameterized to avoid bias.
-There are a lot of missing values due to the limited availability of country-specific data. For those parameters, default values were inserted as a place holder and a user should be able to modify those through a web-based interface.
+### Parameters Data sources
 
-##Countries
-Oct.2021 3 Asian countries (Georgia, Turkey, Iran) + 3 African countries (Ethoiopia, Uganda, Zambia)
+| Parameter | Unit | Distribution | Source  | Notes |
+|:---:|:---:|:---:|:---|:---|
+| Population (LR, SR, P) | head | lognormal | [FAOSTAT](https://www.fao.org/faostat/en/#data/QCL), Country's Statistical Institute | Future pops between 2021-2030 generated with a lognormal regression |
+| Growth Rate (LR, SR, P) | % | normal | Calculated data | Python |
+| PCP Stages | . | . | Collated from different sources, etc. Roadmap meetings, FAST reports | . |
+| Livestock Density (LR, SR, P) | head/km^2 | lognormal | FAOSTAT + calculated data | Population divided by [agricultural area(km^2)](https://www.fao.org/faostat/en/#data/RL) |
+| Sector Proportion | % | normal | [FAOSTAT](https://www.fao.org/faostat/en/#data/QCL), Country's Statistical Institue, Focal points | No exact data available; deduced by the number of slaughtered animals per sector |
+| Age Proportion | % | normal | Country's Statistical Institue, Focal points | No solid sources available; default value deduced from Turkey's data |
+| Vaccinatnion area (ring) | km^2 | . | Focal points | Emergency vaccination ring area from the epicenter |
+| Outbreak numbers | N | Poisson | Roadmap meetings, FAST reports, OIE WAHIS | No solid sources available; intensive data mining required |
+| Prophylactic vaccine coverage | % | BetaPERT | Q2 responses of Delphi questionnaire | PCP-stage specific parameter |
+| Outbreak coverage by vaccination | % | BetaPERT | Q3 responses of Delphi questionnaire | PCP-stage specific parameter |
+| Outbreak reduction | % | BetaPERT | Q4 responses of Delphi questionnaire | PCP-stage specific parameter |
 
-Jan.2022 11 Western Asian countries added (countries from the Western Asia region without historic PCP records were excluded)
+### Dictionary
+* LR: Large Ruminants (Cattle)
+* SR: Small Ruminants (Sheep+Goat)
+* P: Pigs
+* Focal points: Country representatives. We had asked to 3 Focal points (Georgia, Iran, Turkey) to provide us insights on their missing data a long time ago.
+* Delphi questionnaire: Sarah W. and the team conducted Delphi survey to gather expert opinions on three unknown values (Prophylactic vaccine coverage, Outbreak coverage by vaccination, Outbreak reduction). In Round 1 of the Delphi, they didn't gather enough data to fit a BetaPERT distribution on it (e.g. lack of mode; the most probable value), therefore, the data was forced to have a BetaPERT using median as a replacement of the mode. In Round 2, only 2 responses were gathered and those were not parameterized to avoid bias.
+* There are a lot of missing values due to the limited availability of country-specific data. For those parameters, default values were inserted as a place holder and a user should be able to modify those through a web-based interface.
 
-Total 72 countries available in VADEMOS 2022
+### Countries
+- **Oct.2021** 3 Asian countries (Georgia, Turkey, Iran) + 3 African countries (Ethoiopia, Uganda, Zambia)
 
+- **Jan.2022** 11 Western Asian countries added (countries from the Western Asia region without historic PCP records were excluded)
 
-##Validation of the data and outcome of the prediction
+- **Jun.2022** all other countries added
+
+- Total 72 countries available in VADEMOS by Dec 2022:
+    
+
+## Validation of the data and outcome of the prediction
 Hosted a a workshop designed for veterinary services from 6 countries (Georgia, Iran, Turkey, Ethiopia, Uganda, Zambia) to evaluate the quality of the input data collated as well as the ouput produced by the model. Gathered feedback is available in a post-workshop report.
 
-##Files
-vaccinationmodel.R : Parameter processing & Monte-Carlo simulation
-predictPops.R : helper function for vaccinationmodel.R
-plotOutputs.R : output graphing
-app.R : Shiny UI and server defined
-UIParts.R : 'tool' tab in Shiny UI
-UIForms.R : 'survey' and 'feedback' tab in Shiny UI
-about.Rhtml : 'about' tab, general info on the model and EuFMD
-help.Rhtml : sidepanel of 'tool' tab
-footer.html : footer with EuFMD logos
-www/model.css : css for color scheme, look adjustments
+
+### Files
+1. vaccinationmodel.R : Parameter processing & Monte-Carlo simulation
+2. predictPops.R : helper function for vaccinationmodel.R
+3. plotOutputs.R : output graphing
+4. app.R : Shiny UI and server defined
+5. UIParts.R : 'tool' tab in Shiny UI
+6. UIForms.R : 'survey' and 'feedback' tab in Shiny UI
+7. about.Rhtml : 'about' tab, general info on the model and EuFMD
+8. help.Rhtml : sidepanel of 'tool' tab
+9. footer.html : footer with EuFMD logos
+10. www/model.css : css for color scheme, look adjustments
