@@ -1,0 +1,163 @@
+﻿Country,Year,Livestock,Population
+D,2022,Large Ruminants,73648.474
+D,2023,Large Ruminants,76082.273
+D,2024,Large Ruminants,78596.501
+D,2025,Large Ruminants,81193.814
+D,2026,Large Ruminants,83876.958
+D,2027,Large Ruminants,86648.77
+D,2028,Large Ruminants,89512.179
+D,2029,Large Ruminants,92470.214
+D,2030,Large Ruminants,95526
+A,2022,Large Ruminants,1062.452
+A,2023,Large Ruminants,1061.6
+A,2024,Large Ruminants,1060.749
+A,2025,Large Ruminants,1059.899
+A,2026,Large Ruminants,1059.049
+A,2027,Large Ruminants,1058.2
+A,2028,Large Ruminants,1057.351
+A,2029,Large Ruminants,1056.503
+A,2030,Large Ruminants,1055.656
+B,2022,Large Ruminants,5208.174
+B,2023,Large Ruminants,5092.337
+B,2024,Large Ruminants,4979.077
+B,2025,Large Ruminants,4868.336
+B,2026,Large Ruminants,4760.057
+B,2027,Large Ruminants,4654.187
+B,2028,Large Ruminants,4550.672
+B,2029,Large Ruminants,4449.459
+B,2030,Large Ruminants,4350.497
+C,2022,Large Ruminants,450.617
+C,2023,Large Ruminants,456.65
+C,2024,Large Ruminants,462.765
+C,2025,Large Ruminants,468.962
+C,2026,Large Ruminants,475.241
+C,2027,Large Ruminants,481.605
+C,2028,Large Ruminants,488.053
+C,2029,Large Ruminants,494.589
+C,2030,Large Ruminants,501.211
+E,2022,Large Ruminants,19243.429
+E,2023,Large Ruminants,20234.246
+E,2024,Large Ruminants,21276.079
+E,2025,Large Ruminants,22371.555
+E,2026,Large Ruminants,23523.435
+E,2027,Large Ruminants,24734.624
+E,2028,Large Ruminants,26008.175
+E,2029,Large Ruminants,27347.299
+E,2030,Large Ruminants,28755.374
+F,2022,Large Ruminants,4101.413
+F,2023,Large Ruminants,4185.821
+F,2024,Large Ruminants,4271.966
+F,2025,Large Ruminants,4359.884
+F,2026,Large Ruminants,4449.612
+F,2027,Large Ruminants,4541.186
+F,2028,Large Ruminants,4634.645
+F,2029,Large Ruminants,4730.028
+F,2030,Large Ruminants,4827.373
+D,2022,Small Ruminants,94637.333
+D,2023,Small Ruminants,100476.569
+D,2024,Small Ruminants,106676.093
+D,2025,Small Ruminants,113258.135
+D,2026,Small Ruminants,120246.297
+D,2027,Small Ruminants,127665.637
+D,2028,Small Ruminants,135542.759
+D,2029,Small Ruminants,143905.909
+D,2030,Small Ruminants,152785.075
+A,2022,Small Ruminants,824.773
+A,2023,Small Ruminants,829.115
+A,2024,Small Ruminants,833.48
+A,2025,Small Ruminants,837.869
+A,2026,Small Ruminants,842.28
+A,2027,Small Ruminants,846.715
+A,2028,Small Ruminants,851.173
+A,2029,Small Ruminants,855.654
+A,2030,Small Ruminants,860.16
+B,2022,Small Ruminants,56165.503
+B,2023,Small Ruminants,55372.795
+B,2024,Small Ruminants,54591.275
+B,2025,Small Ruminants,53820.785
+B,2026,Small Ruminants,53061.17
+B,2027,Small Ruminants,52312.276
+B,2028,Small Ruminants,51573.951
+B,2029,Small Ruminants,50846.047
+B,2030,Small Ruminants,50128.416
+C,2022,Small Ruminants,1101.412
+C,2023,Small Ruminants,1100.824
+C,2024,Small Ruminants,1100.236
+C,2025,Small Ruminants,1099.648
+C,2026,Small Ruminants,1099.061
+C,2027,Small Ruminants,1098.474
+C,2028,Small Ruminants,1097.887
+C,2029,Small Ruminants,1097.3
+C,2030,Small Ruminants,1096.714
+E,2022,Small Ruminants,22721.732
+E,2023,Small Ruminants,23819.054
+E,2024,Small Ruminants,24969.37
+E,2025,Small Ruminants,26175.239
+E,2026,Small Ruminants,27439.344
+E,2027,Small Ruminants,28764.497
+E,2028,Small Ruminants,30153.648
+E,2029,Small Ruminants,31609.886
+E,2030,Small Ruminants,33136.452
+F,2022,Small Ruminants,4548.758
+F,2023,Small Ruminants,4827.792
+F,2024,Small Ruminants,5123.943
+F,2025,Small Ruminants,5438.26
+F,2026,Small Ruminants,5771.858
+F,2027,Small Ruminants,6125.921
+F,2028,Small Ruminants,6501.702
+F,2029,Small Ruminants,6900.535
+F,2030,Small Ruminants,7323.834
+D,2022,Pigs,40.169
+D,2023,Pigs,41.069
+D,2024,Pigs,41.99
+D,2025,Pigs,42.931
+D,2026,Pigs,43.893
+D,2027,Pigs,44.877
+D,2028,Pigs,45.88
+D,2029,Pigs,46.911
+D,2030,Pigs,47.962
+A,2022,Pigs,106.85
+A,2023,Pigs,101.445
+A,2024,Pigs,96.313
+A,2025,Pigs,91.441
+A,2026,Pigs,86.816
+A,2027,Pigs,82.424
+A,2028,Pigs,78.255
+A,2029,Pigs,74.296
+A,2030,Pigs,70.538
+B,2022,Pigs,0.001
+B,2023,Pigs,0.001
+B,2024,Pigs,0.001
+B,2025,Pigs,0.001
+B,2026,Pigs,0.001
+B,2027,Pigs,0.001
+B,2028,Pigs,0.001
+B,2029,Pigs,0.001
+B,2030,Pigs,0.001
+C,2022,Pigs,0.034
+C,2023,Pigs,0.032
+C,2024,Pigs,0.03
+C,2025,Pigs,0.028
+C,2026,Pigs,0.026
+C,2027,Pigs,0.025
+C,2028,Pigs,0.023
+C,2029,Pigs,0.022
+C,2030,Pigs,0.02
+E,2022,Pigs,3092.581
+E,2023,Pigs,3184.679
+E,2024,Pigs,3279.519
+E,2025,Pigs,3377.183
+E,2026,Pigs,3477.756
+E,2027,Pigs,3581.325
+E,2028,Pigs,3687.977
+E,2029,Pigs,3797.806
+E,2030,Pigs,3910.905
+F,2022,Pigs,1622.059
+F,2023,Pigs,1737.278
+F,2024,Pigs,1860.681
+F,2025,Pigs,1992.849
+F,2026,Pigs,2134.406
+F,2027,Pigs,2286.018
+F,2028,Pigs,2448.4
+F,2029,Pigs,2622.315
+F,2030,Pigs,2808.585

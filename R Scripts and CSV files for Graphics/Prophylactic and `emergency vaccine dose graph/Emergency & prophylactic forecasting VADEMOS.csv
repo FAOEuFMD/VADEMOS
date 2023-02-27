@@ -1,0 +1,109 @@
+Country,Year,Type of Vaccine,Vaccine Dose
+Country D,2022,Prophylactic ,60.588
+Country D,2023,Prophylactic ,62.966
+Country D,2024,Prophylactic ,65.469
+Country D,2025,Prophylactic ,68.14
+Country D,2026,Prophylactic ,70.959
+Country D,2027,Prophylactic ,73.915
+Country D,2028,Prophylactic ,76.979
+Country D,2029,Prophylactic ,80.2
+Country D,2030,Prophylactic ,83.545
+Country A,2022,Prophylactic ,1.72
+Country A,2023,Prophylactic ,1.72
+Country A,2024,Prophylactic ,1.721
+Country A,2025,Prophylactic ,1.721
+Country A,2026,Prophylactic ,1.722
+Country A,2027,Prophylactic ,1.723
+Country A,2028,Prophylactic ,1.723
+Country A,2029,Prophylactic ,1.724
+Country A,2030,Prophylactic ,1.724
+Country B,2022,Prophylactic ,21.358
+Country B,2023,Prophylactic ,20.994
+Country B,2024,Prophylactic ,20.651
+Country B,2025,Prophylactic ,20.325
+Country B,2026,Prophylactic ,20.016
+Country B,2027,Prophylactic ,19.718
+Country B,2028,Prophylactic ,19.427
+Country B,2029,Prophylactic ,19.143
+Country B,2030,Prophylactic ,18.859
+Country C,2022,Prophylactic ,1.46
+Country C,2023,Prophylactic ,1.47
+Country C,2024,Prophylactic ,1.48
+Country C,2025,Prophylactic ,1.49
+Country C,2026,Prophylactic ,1.5
+Country C,2027,Prophylactic ,1.511
+Country C,2028,Prophylactic ,1.522
+Country C,2029,Prophylactic ,1.533
+Country C,2030,Prophylactic ,1.544
+Country E,2022,Prophylactic ,34.225
+Country E,2023,Prophylactic ,35.969
+Country E,2024,Prophylactic ,37.802
+Country E,2025,Prophylactic ,39.727
+Country E,2026,Prophylactic ,41.746
+Country E,2027,Prophylactic ,43.872
+Country E,2028,Prophylactic ,46.106
+Country E,2029,Prophylactic ,48.453
+Country E,2030,Prophylactic ,50.919
+Country F,2022,Prophylactic ,7.068
+Country F,2023,Prophylactic ,7.295
+Country F,2024,Prophylactic ,7.534
+Country F,2025,Prophylactic ,7.783
+Country F,2026,Prophylactic ,8.041
+Country F,2027,Prophylactic ,8.302
+Country F,2028,Prophylactic ,8.572
+Country F,2029,Prophylactic ,8.853
+Country F,2030,Prophylactic ,9.146
+Country D,2022,Emergency,0
+Country D,2023,Emergency,0
+Country D,2024,Emergency,0
+Country D,2025,Emergency,0
+Country D,2026,Emergency,0
+Country D,2027,Emergency,0
+Country D,2028,Emergency,0
+Country D,2029,Emergency,0
+Country D,2030,Emergency,0
+Country A,2022,Emergency,0
+Country A,2023,Emergency,0
+Country A,2024,Emergency,0
+Country A,2025,Emergency,0
+Country A,2026,Emergency,0
+Country A,2027,Emergency,0
+Country A,2028,Emergency,0
+Country A,2029,Emergency,0
+Country A,2030,Emergency,0
+Country B,2022,Emergency,1.283
+Country B,2023,Emergency,1.323
+Country B,2024,Emergency,1.361
+Country B,2025,Emergency,1.402
+Country B,2026,Emergency,1.442
+Country B,2027,Emergency,1.482
+Country B,2028,Emergency,1.522
+Country B,2029,Emergency,1.564
+Country B,2030,Emergency,1.605
+Country C,2022,Emergency,0
+Country C,2023,Emergency,0
+Country C,2024,Emergency,0
+Country C,2025,Emergency,0
+Country C,2026,Emergency,0
+Country C,2027,Emergency,0
+Country C,2028,Emergency,0
+Country C,2029,Emergency,0
+Country C,2030,Emergency,0
+Country E,2022,Emergency,0
+Country E,2023,Emergency,0
+Country E,2024,Emergency,0
+Country E,2025,Emergency,0
+Country E,2026,Emergency,0
+Country E,2027,Emergency,0
+Country E,2028,Emergency,0
+Country E,2029,Emergency,0
+Country E,2030,Emergency,0
+Country F,2022,Emergency,0
+Country F,2023,Emergency,0
+Country F,2024,Emergency,0
+Country F,2025,Emergency,0
+Country F,2026,Emergency,0
+Country F,2027,Emergency,0
+Country F,2028,Emergency,0
+Country F,2029,Emergency,0
+Country F,2030,Emergency,0

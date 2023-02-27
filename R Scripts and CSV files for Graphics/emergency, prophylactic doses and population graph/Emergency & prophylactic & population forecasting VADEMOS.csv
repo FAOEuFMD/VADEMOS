@@ -1,0 +1,271 @@
+Country,Year,Type of Vaccine,Vaccine Dose
+Country A,2022,Prophylactic Vaccine Dose Number ,1.72
+Country A,2023,Prophylactic Vaccine Dose Number ,1.72
+Country A,2024,Prophylactic Vaccine Dose Number ,1.721
+Country A,2025,Prophylactic Vaccine Dose Number ,1.721
+Country A,2026,Prophylactic Vaccine Dose Number ,1.722
+Country A,2027,Prophylactic Vaccine Dose Number ,1.723
+Country A,2028,Prophylactic Vaccine Dose Number ,1.723
+Country A,2029,Prophylactic Vaccine Dose Number ,1.724
+Country A,2030,Prophylactic Vaccine Dose Number ,1.724
+Country A,2022,Emergency Vaccine Dose Number ,0
+Country A,2023,Emergency Vaccine Dose Number ,0
+Country A,2024,Emergency Vaccine Dose Number ,0
+Country A,2025,Emergency Vaccine Dose Number ,0
+Country A,2026,Emergency Vaccine Dose Number ,0
+Country A,2027,Emergency Vaccine Dose Number ,0
+Country A,2028,Emergency Vaccine Dose Number ,0
+Country A,2029,Emergency Vaccine Dose Number ,0
+Country A,2030,Emergency Vaccine Dose Number ,0
+Country B,2022,Prophylactic Vaccine Dose Number ,21.358
+Country B,2023,Prophylactic Vaccine Dose Number ,20.994
+Country B,2024,Prophylactic Vaccine Dose Number ,20.651
+Country B,2025,Prophylactic Vaccine Dose Number ,20.325
+Country B,2026,Prophylactic Vaccine Dose Number ,20.016
+Country B,2027,Prophylactic Vaccine Dose Number ,19.718
+Country B,2028,Prophylactic Vaccine Dose Number ,19.427
+Country B,2029,Prophylactic Vaccine Dose Number ,19.143
+Country B,2030,Prophylactic Vaccine Dose Number ,18.859
+Country B,2022,Emergency Vaccine Dose Number ,1.283
+Country B,2023,Emergency Vaccine Dose Number ,1.323
+Country B,2024,Emergency Vaccine Dose Number ,1.361
+Country B,2025,Emergency Vaccine Dose Number ,1.402
+Country B,2026,Emergency Vaccine Dose Number ,1.442
+Country B,2027,Emergency Vaccine Dose Number ,1.482
+Country B,2028,Emergency Vaccine Dose Number ,1.522
+Country B,2029,Emergency Vaccine Dose Number ,1.564
+Country B,2030,Emergency Vaccine Dose Number ,1.605
+Country C,2022,Prophylactic Vaccine Dose Number ,1.46
+Country C,2023,Prophylactic Vaccine Dose Number ,1.47
+Country C,2024,Prophylactic Vaccine Dose Number ,1.48
+Country C,2025,Prophylactic Vaccine Dose Number ,1.49
+Country C,2026,Prophylactic Vaccine Dose Number ,1.5
+Country C,2027,Prophylactic Vaccine Dose Number ,1.511
+Country C,2028,Prophylactic Vaccine Dose Number ,1.522
+Country C,2029,Prophylactic Vaccine Dose Number ,1.533
+Country C,2030,Prophylactic Vaccine Dose Number ,1.544
+Country C,2022,Emergency Vaccine Dose Number ,0
+Country C,2023,Emergency Vaccine Dose Number ,0
+Country C,2024,Emergency Vaccine Dose Number ,0
+Country C,2025,Emergency Vaccine Dose Number ,0
+Country C,2026,Emergency Vaccine Dose Number ,0
+Country C,2027,Emergency Vaccine Dose Number ,0
+Country C,2028,Emergency Vaccine Dose Number ,0
+Country C,2029,Emergency Vaccine Dose Number ,0
+Country C,2030,Emergency Vaccine Dose Number ,0
+Country D,2022,Prophylactic Vaccine Dose Number ,60.588
+Country D,2023,Prophylactic Vaccine Dose Number ,62.966
+Country D,2024,Prophylactic Vaccine Dose Number ,65.469
+Country D,2025,Prophylactic Vaccine Dose Number ,68.14
+Country D,2026,Prophylactic Vaccine Dose Number ,70.959
+Country D,2027,Prophylactic Vaccine Dose Number ,73.915
+Country D,2028,Prophylactic Vaccine Dose Number ,76.979
+Country D,2029,Prophylactic Vaccine Dose Number ,80.2
+Country D,2030,Prophylactic Vaccine Dose Number ,83.545
+Country D,2022,Emergency Vaccine Dose Number ,0
+Country D,2023,Emergency Vaccine Dose Number ,0
+Country D,2024,Emergency Vaccine Dose Number ,0
+Country D,2025,Emergency Vaccine Dose Number ,0
+Country D,2026,Emergency Vaccine Dose Number ,0
+Country D,2027,Emergency Vaccine Dose Number ,0
+Country D,2028,Emergency Vaccine Dose Number ,0
+Country D,2029,Emergency Vaccine Dose Number ,0
+Country D,2030,Emergency Vaccine Dose Number ,0
+Country E,2022,Prophylactic Vaccine Dose Number ,34.225
+Country E,2023,Prophylactic Vaccine Dose Number ,35.969
+Country E,2024,Prophylactic Vaccine Dose Number ,37.802
+Country E,2025,Prophylactic Vaccine Dose Number ,39.727
+Country E,2026,Prophylactic Vaccine Dose Number ,41.746
+Country E,2027,Prophylactic Vaccine Dose Number ,43.872
+Country E,2028,Prophylactic Vaccine Dose Number ,46.106
+Country E,2029,Prophylactic Vaccine Dose Number ,48.453
+Country E,2030,Prophylactic Vaccine Dose Number ,50.919
+Country E,2022,Emergency Vaccine Dose Number ,0
+Country E,2023,Emergency Vaccine Dose Number ,0
+Country E,2024,Emergency Vaccine Dose Number ,0
+Country E,2025,Emergency Vaccine Dose Number ,0
+Country E,2026,Emergency Vaccine Dose Number ,0
+Country E,2027,Emergency Vaccine Dose Number ,0
+Country E,2028,Emergency Vaccine Dose Number ,0
+Country E,2029,Emergency Vaccine Dose Number ,0
+Country E,2030,Emergency Vaccine Dose Number ,0
+Country F,2022,Prophylactic Vaccine Dose Number ,7.068
+Country F,2023,Prophylactic Vaccine Dose Number ,7.295
+Country F,2024,Prophylactic Vaccine Dose Number ,7.534
+Country F,2025,Prophylactic Vaccine Dose Number ,7.783
+Country F,2026,Prophylactic Vaccine Dose Number ,8.041
+Country F,2027,Prophylactic Vaccine Dose Number ,8.302
+Country F,2028,Prophylactic Vaccine Dose Number ,8.572
+Country F,2029,Prophylactic Vaccine Dose Number ,8.853
+Country F,2030,Prophylactic Vaccine Dose Number ,9.146
+Country F,2022,Emergency Vaccine Dose Number ,0
+Country F,2023,Emergency Vaccine Dose Number ,0
+Country F,2024,Emergency Vaccine Dose Number ,0
+Country F,2025,Emergency Vaccine Dose Number ,0
+Country F,2026,Emergency Vaccine Dose Number ,0
+Country F,2027,Emergency Vaccine Dose Number ,0
+Country F,2028,Emergency Vaccine Dose Number ,0
+Country F,2029,Emergency Vaccine Dose Number ,0
+Country F,2030,Emergency Vaccine Dose Number ,0
+Country A,2022,Large Ruminant Population,1.062452
+Country A,2023,Large Ruminant Population,1.0616
+Country A,2024,Large Ruminant Population,1.060749
+Country A,2025,Large Ruminant Population,1.059899
+Country A,2026,Large Ruminant Population,1.059049
+Country A,2027,Large Ruminant Population,1.0582
+Country A,2028,Large Ruminant Population,1.057351
+Country A,2029,Large Ruminant Population,1.056503
+Country A,2030,Large Ruminant Population,1.055656
+Country B,2022,Large Ruminant Population,5.208174
+Country B,2023,Large Ruminant Population,5.092337
+Country B,2024,Large Ruminant Population,4.979077
+Country B,2025,Large Ruminant Population,4.868336
+Country B,2026,Large Ruminant Population,4.760057
+Country B,2027,Large Ruminant Population,4.654187
+Country B,2028,Large Ruminant Population,4.550672
+Country B,2029,Large Ruminant Population,4.449459
+Country B,2030,Large Ruminant Population,4.350497
+Country C,2022,Large Ruminant Population,0.450617
+Country C,2023,Large Ruminant Population,0.45665
+Country C,2024,Large Ruminant Population,0.462765
+Country C,2025,Large Ruminant Population,0.468962
+Country C,2026,Large Ruminant Population,0.475241
+Country C,2027,Large Ruminant Population,0.481605
+Country C,2028,Large Ruminant Population,0.488053
+Country C,2029,Large Ruminant Population,0.494589
+Country C,2030,Large Ruminant Population,0.501211
+Country D,2022,Large Ruminant Population,73.648474
+Country D,2023,Large Ruminant Population,76.082273
+Country D,2024,Large Ruminant Population,78.596501
+Country D,2025,Large Ruminant Population,81.193814
+Country D,2026,Large Ruminant Population,83.876958
+Country D,2027,Large Ruminant Population,86.64877
+Country D,2028,Large Ruminant Population,89.512179
+Country D,2029,Large Ruminant Population,92.470214
+Country D,2030,Large Ruminant Population,95.526
+Country E,2022,Large Ruminant Population,19.243429
+Country E,2023,Large Ruminant Population,20.234246
+Country E,2024,Large Ruminant Population,21.276079
+Country E,2025,Large Ruminant Population,22.371555
+Country E,2026,Large Ruminant Population,23.523435
+Country E,2027,Large Ruminant Population,24.734624
+Country E,2028,Large Ruminant Population,26.008175
+Country E,2029,Large Ruminant Population,27.347299
+Country E,2030,Large Ruminant Population,28.755374
+Country F,2022,Large Ruminant Population,4.101413
+Country F,2023,Large Ruminant Population,4.185821
+Country F,2024,Large Ruminant Population,4.271966
+Country F,2025,Large Ruminant Population,4.359884
+Country F,2026,Large Ruminant Population,4.449612
+Country F,2027,Large Ruminant Population,4.541186
+Country F,2028,Large Ruminant Population,4.634645
+Country F,2029,Large Ruminant Population,4.730028
+Country F,2030,Large Ruminant Population,4.827373
+Country A,2022,Small Ruminant Population,0.824773
+Country A,2023,Small Ruminant Population,0.829115
+Country A,2024,Small Ruminant Population,0.83348
+Country A,2025,Small Ruminant Population,0.837869
+Country A,2026,Small Ruminant Population,0.84228
+Country A,2027,Small Ruminant Population,0.846715
+Country A,2028,Small Ruminant Population,0.851173
+Country A,2029,Small Ruminant Population,0.855654
+Country A,2030,Small Ruminant Population,0.86016
+Country B,2022,Small Ruminant Population,56.165503
+Country B,2023,Small Ruminant Population,55.372795
+Country B,2024,Small Ruminant Population,54.591275
+Country B,2025,Small Ruminant Population,53.820785
+Country B,2026,Small Ruminant Population,53.06117
+Country B,2027,Small Ruminant Population,52.312276
+Country B,2028,Small Ruminant Population,51.573951
+Country B,2029,Small Ruminant Population,50.846047
+Country B,2030,Small Ruminant Population,50.128416
+Country C,2022,Small Ruminant Population,1.101412
+Country C,2023,Small Ruminant Population,1.100824
+Country C,2024,Small Ruminant Population,1.100236
+Country C,2025,Small Ruminant Population,1.099648
+Country C,2026,Small Ruminant Population,1.099061
+Country C,2027,Small Ruminant Population,1.098474
+Country C,2028,Small Ruminant Population,1.097887
+Country C,2029,Small Ruminant Population,1.0973
+Country C,2030,Small Ruminant Population,1.096714
+Country D,2022,Small Ruminant Population,94.637333
+Country D,2023,Small Ruminant Population,100.476569
+Country D,2024,Small Ruminant Population,106.676093
+Country D,2025,Small Ruminant Population,113.258135
+Country D,2026,Small Ruminant Population,120.246297
+Country D,2027,Small Ruminant Population,127.665637
+Country D,2028,Small Ruminant Population,135.542759
+Country D,2029,Small Ruminant Population,143.905909
+Country D,2030,Small Ruminant Population,152.785075
+Country E,2022,Small Ruminant Population,22.721732
+Country E,2023,Small Ruminant Population,23.819054
+Country E,2024,Small Ruminant Population,24.96937
+Country E,2025,Small Ruminant Population,26.175239
+Country E,2026,Small Ruminant Population,27.439344
+Country E,2027,Small Ruminant Population,28.764497
+Country E,2028,Small Ruminant Population,30.153648
+Country E,2029,Small Ruminant Population,31.609886
+Country E,2030,Small Ruminant Population,33.136452
+Country F,2022,Small Ruminant Population,4.548758
+Country F,2023,Small Ruminant Population,4.827792
+Country F,2024,Small Ruminant Population,5.123943
+Country F,2025,Small Ruminant Population,5.43826
+Country F,2026,Small Ruminant Population,5.771858
+Country F,2027,Small Ruminant Population,6.125921
+Country F,2028,Small Ruminant Population,6.501702
+Country F,2029,Small Ruminant Population,6.900535
+Country F,2030,Small Ruminant Population,7.323834
+Country A,2022,Pig Population,0.10685
+Country A,2023,Pig Population,0.101445
+Country A,2024,Pig Population,0.096313
+Country A,2025,Pig Population,0.091441
+Country A,2026,Pig Population,0.086816
+Country A,2027,Pig Population,0.082424
+Country A,2028,Pig Population,0.078255
+Country A,2029,Pig Population,0.074296
+Country A,2030,Pig Population,0.070538
+Country B,2022,Pig Population,0.000001
+Country B,2023,Pig Population,0.000001
+Country B,2024,Pig Population,0.000001
+Country B,2025,Pig Population,0.000001
+Country B,2026,Pig Population,0.000001
+Country B,2027,Pig Population,0.000001
+Country B,2028,Pig Population,0.000001
+Country B,2029,Pig Population,0.000001
+Country B,2030,Pig Population,0.000001
+Country C,2022,Pig Population,0.000034
+Country C,2023,Pig Population,0.000032
+Country C,2024,Pig Population,0.00003
+Country C,2025,Pig Population,0.000028
+Country C,2026,Pig Population,0.000026
+Country C,2027,Pig Population,0.000025
+Country C,2028,Pig Population,0.000023
+Country C,2029,Pig Population,0.000022
+Country C,2030,Pig Population,0.00002
+Country D,2022,Pig Population,0.040169
+Country D,2023,Pig Population,0.041069
+Country D,2024,Pig Population,0.04199
+Country D,2025,Pig Population,0.042931
+Country D,2026,Pig Population,0.043893
+Country D,2027,Pig Population,0.044877
+Country D,2028,Pig Population,0.04588
+Country D,2029,Pig Population,0.046911
+Country D,2030,Pig Population,0.047962
+Country E,2022,Pig Population,3.092581
+Country E,2023,Pig Population,3.184679
+Country E,2024,Pig Population,3.279519
+Country E,2025,Pig Population,3.377183
+Country E,2026,Pig Population,3.477756
+Country E,2027,Pig Population,3.581325
+Country E,2028,Pig Population,3.687977
+Country E,2029,Pig Population,3.797806
+Country E,2030,Pig Population,3.910905
+Country F,2022,Pig Population,1.622059
+Country F,2023,Pig Population,1.737278
+Country F,2024,Pig Population,1.860681
+Country F,2025,Pig Population,1.992849
+Country F,2026,Pig Population,2.134406
+Country F,2027,Pig Population,2.286018
+Country F,2028,Pig Population,2.4484
+Country F,2029,Pig Population,2.622315
+Country F,2030,Pig Population,2.808585

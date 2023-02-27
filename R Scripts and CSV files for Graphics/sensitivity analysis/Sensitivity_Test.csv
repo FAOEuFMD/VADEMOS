@@ -1,0 +1,43 @@
+﻿Parameter,Proportion,Value
+Population LR,75%,0.166
+Population LR,50%,0.117
+Population LR,25%,0.063
+Population LR,-25%,-0.069
+Population LR,-50%,-0.155
+Population LR,-75%,-0.270
+Population SR,75%,0.107
+Population SR,50%,0.076
+Population SR,25%,0.040
+Population SR,-25%,-0.039
+Population SR,-50%,-0.082
+Population SR,-75%,-0.133
+SR_Prop,75%,0.057
+SR_Prop,50%,0.038
+SR_Prop,25%,0.021
+SR_Prop,-25%,-0.031
+SR_Prop,-50%,-0.045
+SR_Prop,-75%,-0.067
+LR_Prop,75%,0.055
+LR_Prop,50%,0.045
+LR_Prop,25%,0.031
+LR_Prop,-25%,-0.031
+LR_Prop,-50%,-0.076
+LR_Prop,-75%,-0.110
+Outbreaks,75%,0.007
+Outbreaks,50%,0.005
+Outbreaks,25%,0.002
+Outbreaks,-25%,-0.002
+Outbreaks,-50%,-0.004
+Outbreaks,-75%,-0.006
+LR Outbreak coverage,75%,0.005
+LR Outbreak coverage,50%,0.004
+LR Outbreak coverage,25%,0.003
+LR Outbreak coverage,-25%,-0.001
+LR Outbreak coverage,-50%,-0.002
+LR Outbreak coverage,-75%,-0.003
+Density,75%,0.003
+Density,50%,0.002
+Density,25%,0.001
+Density,-25%,-0.001
+Density,-50%,-0.001
+Density,-75%,-0.002
