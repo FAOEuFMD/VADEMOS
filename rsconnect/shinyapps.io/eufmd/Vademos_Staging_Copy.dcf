@@ -1,0 +1,12 @@
+name: Vademos_Staging_Copy
+title: VADEMOS
+username: eufmd
+account: eufmd
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11394785
+bundleId: 9272883
+url: https://eufmd.shinyapps.io/Vademos_Staging_Copy/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

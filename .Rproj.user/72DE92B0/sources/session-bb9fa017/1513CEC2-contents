@@ -1,0 +1,5 @@
+DB_HOST=eufmd-database-1.cqodkl4vazie.eu-north-1.rds.amazonaws.com
+DB_USER=VADEMOS
+DB_PASSWORD=24VADEMOSEuFMD
+DB_NAME=VADEMOS
+DB_PORT=3306

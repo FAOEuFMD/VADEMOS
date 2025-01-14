@@ -1,0 +1,13 @@
+name: vademos-test
+title: vademos-test
+username:
+account: eufmd
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5709663
+bundleId: 5786683
+url: https://eufmd.shinyapps.io/vademos-test/
+when: 1649686136.86335
+lastSyncTime: 1649686136.86335
+asMultiple: FALSE
+asStatic: FALSE

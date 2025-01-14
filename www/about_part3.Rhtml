@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VADEMOS Mathematical Model</title>
+</head>
+<body>
+
+<h2>VADEMOS Mathematical Models</h2>
+
+<h3>1. Livestock Population Prediction</h3>
+<p>The model predicts population for each species using time series methods (AutoEnsemble) based on FAOSTAT data. If the prediction falls outside the confidence interval, it defaults to the last available population value (2023).</p>
+<div class="equation">
+P<sub>t,c,s</sub> = AutoEnsemble(X<sub>c,s</sub>),<br>
+if P<sub>t,c,s</sub> &isin; [CI_L, CI_U],<br>
+else P<sub>t,c,s</sub> = FAOSTAT (2023)
+</div>
+<p>Where:</p>
+<ul>
+    <li>P<sub>t,c,s</sub> is the population of species <em>s</em> in country <em>c</em> at time <em>t</em>.</li>
+    <li>X<sub>c,s</sub> is the historical data from FAOSTAT.</li>
+</ul>
+
+<h3>2. Population Breakdown by Age Group</h3>
+<p>The population is split into youngstock and adult stock based on species-specific proportions:</p>
+<div class="equation">
+Youngstock Proportion (YP) = Y<sub>s</sub> / 100<br>
+Adult Proportion (AP) = 1 - Y<sub>s</sub>
+</div>
+<div class="equation">
+Youngstock Population (YV) = P<sub>t,c</sub><sup>s</sup> &times; YP<sub>s</sub><br>
+Adultstock Population (AV) = P<sub>t,c</sub><sup>s</sup> &times; AP<sub>s</sub>
+</div>
+
+<h3>3. Vaccination Schedules</h3>
+<p>Vaccination needs for young and adult stock are determined as:</p>
+<div class="equation">
+Youngstock Vaccine Requirement (YVR) = YV &times; VS<sub>Y</sub><sup>s</sup><br>
+Adultstock Vaccine Requirement (AVR) = AV &times; VS<sub>A</sub><sup>s</sup>
+</div>
+
+<h3>4. PCP Stage and Vaccination Coverage</h3>
+<p>Vaccination coverage is based on the PCP stage of each country:</p>
+<div class="equation">
+C<sub>s</sub><sup>PCP</sup> = f(PCP Stage, s)
+</div>
+
+<h3>5. Prophylactic Vaccine Requirement</h3>
+<p>The prophylactic vaccine requirement is:</p>
+<div class="equation">
+Prophylactic Vaccine Requirement (PVR) = (YVR + AVR) &times; C<sub>s</sub><sup>PCP</sup>
+</div>
+
+<h3>6. Density Mean</h3>
+<p>The mean livestock population density within an administrative area is calculated as:</p>
+<div class="equation">
+Mean Density = (Σ (Livestock Population per Pixel × Area of Pixel)) / (Σ Area of Pixel)
+</div>
+
+<h3>7. Density Percentage of the Administrative Area</h3>
+<p>The density percentage of the administrative area is determined by comparing the livestock population density within the area to the total area:</p>
+<div class="equation">
+Density Percentage = (Total Livestock Population in Area / Total Area) × 100
+</div>
+
+<h3>7. Emergency Vaccination Requirement</h3>
+<p>The emergency vaccination requirement is calculated based on the input radius and the mean livestock population density:</p>
+<div class="equation">
+Emergency Vaccination Requirement = π × radius² × Mean Density
+</div>
+
+
+
+</body>
+</html>
+
+

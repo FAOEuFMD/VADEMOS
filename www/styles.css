@@ -1,0 +1,147 @@
+
+/* NavbarPage */
+.navbar, .navbar-default {
+    background-color: #073f23 !important; /* Header background color */
+    border-color: #073f23;
+}
+
+/* Navbar brand styling */
+.navbar-default .navbar-brand {
+    color: white !important; /* Header text color */
+    width: 560px; /* Space between the logo and the menu bar */
+}
+
+.navbar-default .navbar-brand:hover {
+    color: #16834c !important; /* Header text color on hover */
+}
+
+/* Navbar links styling */
+.navbar-default .navbar-nav > li > a {
+    color: white !important; /* Header text color */
+    padding: 10px 10px; /* Increase padding to add space */
+}
+
+.navbar-default .navbar-nav > li > a:hover {
+    color: #e6e6e6 !important; /* Header text color on hover */
+    background-color: #073f23;
+    text-decoration: underline;
+}
+
+/* Active navbar link styling */
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:focus,
+.navbar-default .navbar-nav > .active > a:hover {
+    color: white !important;
+    background-color: #0b4b2b !important;
+}
+
+/* Remove white padding at the top and sides */
+body {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin: 0 !important;
+}
+
+/* Increase padding for the navbar */
+.navbar {
+    padding: 15px 20px; /* Adjust as needed for more space */
+}
+
+
+
+
+
+/* Tabs */
+.tabbable > .nav > li > a {color: #073f23;}
+.tabbable > .nav > li[class=active] > a,
+.tabbable > .nav > li[class=active] > a:focus,
+.tabbable > .nav > li[class=active] > a:hover {color: white; background-color:#073f23;}
+
+.tabbable > .nav > li > a:hover {color: white; background-color:#073f23;}
+
+
+/* Make the sidebar sticky */
+.sticky-sidebar {
+    position: fixed;
+    top: 90px;               /* Stick it to the top */
+    bottom: 500px;
+    width: 22%;              /* Set width as a percentage to make it responsive */
+    height: 66vh;            /* 80% of the viewport height */
+    background-color: #F4F4F4;
+    overflow-y: auto;
+    padding: 0 10px;         /* Balanced padding: 0 for top/bottom, 20px for left/right */
+    margin-left: 0px;       /* Add some space between the sidebar and the body */
+    z-index: 1000;
+}
+
+/* For medium screens (tablets and small desktops) */
+@media (max-width: 992px) {
+    .sticky-sidebar {
+        width: 25%;          /* Increase width slightly for smaller screens */
+        padding: 0 10px;     /* Adjust padding for smaller screens */
+    }
+}
+
+/* For small screens (phones) */
+@media (max-width: 768px) {
+    .sticky-sidebar {
+        position: relative;   /* Remove fixed positioning */
+        width: 100%;          /* Full width */
+        height: auto;         /* Let it grow based on content */
+        padding: 0 10px;      /* Reduce padding on small screens */
+        z-index: 100;         /* Lower z-index to ensure it doesn't overlap */
+        margin: 10px 0;       /* Add some space below the sidebar */
+    }
+}
+
+
+
+/* Input widgets */
+/* sldier ok ,  has been dealt within the app.R using 'chooseSliderskin' function */
+
+.btn-custom {
+        background-color: white !important;   /* Background color */
+        color: black !important;              /* Text color */
+        border: 1px solid #073f23 !important; /* Border color */
+    }
+
+.dropdown-menu .active > a,
+.dropdown-menu .active > a:focus,
+.dropdown-menu .active > a:hover {
+        background-color: #e6e6e6 !important;  /* Active menu item background */
+        color: black !important;               /* Active menu item text */
+    }
+
+.dropdown-menu > li > a:hover {
+        background-color: #e6e6e6 !important;  /* Hover background color */
+        color: black !important;               /* Hover text color */
+    }
+
+.dropdown-menu .bs-actionsbox .btn {
+        background-color: grey !important;  /* Background color for 'Select All' and 'Deselect All' */
+        color: white !important;               /* Text color */
+    }
+
+.dropdown-menu .bs-actionsbox .btn:hover {
+        background-color: #e6e6e6 !important;  /* Darker shade for hover effect */
+        color: white !important;               /* Text color */
+    }
+
+    /* Increase specificity for the hover state to avoid conflicts */
+.dropdown-menu > li > a:hover, 
+.dropdown-menu > li > a:focus, 
+.dropdown-menu > li > a:active {
+        background-color: #e6e6e6 !important;  /* Hover background color */
+        color: black !important;               /* Hover text color */
+    }
+ /*help buttons*/
+.btn-custom2 {
+        background-color: #073f23 !important;   /* Background color */
+        color: white !important;              /* Text color */
+        border: 1px solid #073f23 !important; /* Border color */
+    }
+
+
+/* Font color change for div id "help_region_selection" */
+.help_texts {color: #ff0000; font-style: italic;}

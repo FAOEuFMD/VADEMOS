@@ -1,0 +1,11 @@
+name: VADEMOS1_07
+title: VADEMOS1_07
+username:
+account: eufmd
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6623999
+bundleId: 8326445
+url: https://eufmd.shinyapps.io/VADEMOS1_07/
+asMultiple: FALSE
+asStatic: FALSE
