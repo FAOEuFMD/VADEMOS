@@ -59,15 +59,18 @@ library(shinycssloaders)
 # Load environment variables credentials in the .Renviron file
 db_host <- Sys.getenv("DB_HOST")
 db_user <- Sys.getenv("DB_USER")
+db_user2 <- Sys.getenv("DB_USER2")
 db_password <- Sys.getenv("DB_PASSWORD")
+db_password2 <- Sys.getenv("DB_PASSWORD2")
 db_port <- Sys.getenv("DB_PORT")
 db_name <- Sys.getenv("DB_NAME")
+db_name2 <- Sys.getenv("DB_NAME2")
 
 ###################################################
 # 2 - Establish Connection
 ###################################################
 
-pcp<-read_excel("pcp_2024.xlsx")
+#pcp<-read_excel("pcp_2024.xlsx")
 outbreak<-read_excel("Outbreaks_Wahis.xlsx")
 # Replace '-' with 0 and transform the Cases column to numeric (integer)
 outbreak$Cases <- as.integer(gsub("-", "0", outbreak$Cases))
@@ -651,52 +654,68 @@ server <- function(input, output, session) {
 ###########PCP data 
   pcp_data <- reactive({
     req(input$Country)
+    con <- dbConnect(RMySQL::MySQL(),
+                     dbname = db_name2,  # or db_name if you want the other DB
+                     host = db_host,
+                     port = as.numeric(db_port),
+                     user = db_user2,
+                     password = db_password2)
+    # Ensure the connection is closed after the query
+    on.exit(dbDisconnect(con), add = TRUE)
     
-    # Filter data based on the selected country
-    pcp_filtered <- pcp[pcp$Country %in% input$Country, ]
+    # Query to filter the forecast data from the database based on the selected country
+    query <- sprintf(
+      "SELECT * FROM PCP.PCP_DB 
+     WHERE Country IN (%s)",
+      paste(shQuote(input$Country), collapse = ", ")
+    )
     
-    # Remove rows with NA in 'PCP-FMD Stage'
-    pcp_filtered <- pcp_filtered[!is.na(pcp_filtered$`PCP-FMD Stage`), ]
+    # Execute the query and fetch the data
+    result <- dbGetQuery(con, query)
     
-    # Custom mapping of 'PCP-FMD Stage' to numeric values
-    pcp_filtered$`PCP-FMD Stage Numeric` <- case_when(
-      pcp_filtered$`PCP-FMD Stage` == "PCP-0" ~ 0,
-      pcp_filtered$`PCP-FMD Stage` == "PCP-1" ~ 1,
-      pcp_filtered$`PCP-FMD Stage` == "PCP-2" ~ 2,
-      pcp_filtered$`PCP-FMD Stage` == "PCP-3" ~ 3,
-      pcp_filtered$`PCP-FMD Stage` == "PCP-4" ~ 4,
-      pcp_filtered$`PCP-FMD Stage` == "PCP-1-Provisional" ~ 0.5,
-      pcp_filtered$`PCP-FMD Stage` == "PCP-2-Provisional" ~ 1.5,
-      pcp_filtered$`PCP-FMD Stage` == "PCP-3-Provisional" ~ 2.5,
-      pcp_filtered$`PCP-FMD Stage` == "PCP-4-Provisional" ~ 3.5,
+    # Add numeric mapping for PCP_Stage
+    result$PCP_Stage_Numeric <- case_when(
+      result$PCP_Stage == "PCP-0" ~ 0,
+      result$PCP_Stage == "PCP-1" ~ 1,
+      result$PCP_Stage == "PCP-2" ~ 2,
+      result$PCP_Stage == "PCP-3" ~ 3,
+      result$PCP_Stage == "PCP-4" ~ 4,
+      result$PCP_Stage == "PCP-1-Provisional" ~ 0.5,
+      result$PCP_Stage == "PCP-2-Provisional" ~ 1.5,
+      result$PCP_Stage == "PCP-3-Provisional" ~ 2.5,
+      result$PCP_Stage == "PCP-4-Provisional" ~ 3.5,
       TRUE ~ NA_real_  # Handle unexpected cases
     )
+    # Remove rows with NA in PCP_Stage
+    result <- result[!is.na(result$PCP_Stage), ]
     
-    return(pcp_filtered)
+    return(result)
   })
   
-##########PCP table
-
+  
+  
   output$pcp_table <- renderDT({
-    # Get the filtered data
-    pcp_filtered <- pcp_data()
+    # Access the reactive pcp_data
+    data <- pcp_data()
     
-    # Filter for the year 2024
-    pcp_2024 <- pcp_filtered[pcp_filtered$Year == 2024, ]
+    # Filter for the year 2025 directly
+    pcp_2025 <- data[data$Year == 2025, ]
     
-    print(pcp_2024)
+    # Print for debugging
+    print(pcp_2025)
     
     # Render the DataTable with editable cells
-    datatable(pcp_2024, 
-              options = list(
-                pageLength = 10, 
-                dom = 't', 
-                 columnDefs = list(list(visible = FALSE, targets = c(1,3,4,5,7,8)))),
-                editable = list(target = 'cell', disable = list(columns = 2))
-                
-              
+    datatable(
+      pcp_2025, 
+      options = list(
+        pageLength = 10, 
+        dom = 't', 
+        columnDefs = list(list(visible = FALSE, targets = c(1,3,4,5,7,8,9)))  # Adjust column visibility
+      ),
+      editable = list(target = 'cell', disable = list(columns = 2))
     )
   })
+  
   
   
   
@@ -716,8 +735,8 @@ server <- function(input, output, session) {
   
   get_plot_pcp_lines <- function(df) {
     # Check if 'PCP-FMD Stage' exists in the dataframe
-    if (!"PCP-FMD Stage" %in% colnames(df)) {
-      stop("'PCP-FMD Stage' column is missing in the dataframe")
+    if (!"PCP_Stage" %in% colnames(df)) {
+      stop("'PCP_Stage' column is missing in the dataframe")
     }
     
     
@@ -732,56 +751,38 @@ server <- function(input, output, session) {
       country <- countries[i]
       country_data <- df[df$Country == country, ]
       
-      # Set visibility: Only the first country will be visible initially
-      visible <- if (i == 1) TRUE else "legendonly"
-      
-      # Add a line trace with color based on PCP stage
+      # Add a bar trace for the current country
       p <- p %>%
-        add_trace(
+        add_bars(
           data = country_data,
-          x = ~Year, 
-          y = ~`PCP-FMD Stage Numeric`, 
-          type = 'bar',
-          color = ~as.factor(`PCP-FMD Stage Numeric`), colors = pcpcolors,
-          #mode = 'lines+markers', 
-          #line = list(color = 'black'),  # Line color
-          #marker = list(color = ~pcpcolors, size= 12),  # Color points by PCP stage
-          text = ~paste(`PCP-FMD Stage`),
+          x = ~Year,
+          y = ~PCP_Stage_Numeric,
+          color = ~as.factor(PCP_Stage_Numeric),  # Color by PCP Stage
+          colors = pcpcolors,
           name = country,
-          visible = visible
+          text = ~paste("PCP Stage:", PCP_Stage),
+          hoverinfo = "text",
+          visible = if (i == 1) TRUE else "legendonly"  # Show only the first country by default
         )
     }
     
-    # Create dropdown menu that allows selecting a single country to display
+    # Adjust layout to remove dropdown and focus on legend interactivity
     p <- p %>%
       layout(
-        title = list(text = "PCP-FMD Progression by Country", x = 0, xanchor = 'left'),
+        title = list(
+          text = "PCP-FMD Progression by Country",
+          x = 0,
+          xanchor = "left"
+        ),
         xaxis = list(title = "Year"),
         yaxis = list(
           title = "PCP-FMD Stage",
-          tickmode = 'linear', 
-          tickvals = 0:4, 
-          ticktext = as.character(0:4),
-          range = c(0, 4)  # Set the range for PCP stages
+          tickmode = "linear",
+          tickvals = seq(0, 4, by = 0.5),
+          ticktext = as.character(seq(0, 4, by = 0.5)),
+          range = c(0, 4)
         ),
-        showlegend = TRUE,  # Show legend for countries
-        updatemenus = list(
-          list(
-            buttons = lapply(seq_along(countries), function(i) {
-              list(
-                method = 'update',
-                args = list(
-                  list(visible = sapply(seq_along(countries), function(j) j == i)),  # Only show the selected country
-                  list(title = paste("PCP-FMD Progression -", countries[i]))
-                ),
-                label = countries[i]
-              )
-            }),
-            direction = 'down',
-            showactive = TRUE,
-            x = 0.1, y = 1.15  # Adjust position of the dropdown menu
-          )
-        )
+        showlegend = TRUE  # Use legend for toggling countries
       )
     
     return(p)
@@ -887,7 +888,7 @@ server <- function(input, output, session) {
       print(paste("Country:", country, "Year:", year, "Specie:", specie, "Forecasted Value:", forecast_value))
       
       # Step 4: Get young/adult stock proportions and vaccination schedule based on specie
-      if (specie %in% c("Cattle", "Buffalo", "Camels", "Other camelids")) {
+      if (specie %in% c("Cattle", "Buffalo", "Camels")) {
         ys_prop <- as.numeric(youngstock_proportions$selections$lr)  # Large ruminants proportion
         adult_prop <- 100 - ys_prop  # Adult proportion
         ys_vac_schedule <- as.numeric(user_vaccine_schedule$selections$lr_ys)
@@ -954,7 +955,7 @@ server <- function(input, output, session) {
       print(paste("Youngstock Vaccine Requirement:", youngstock_vaccine_requirement, 
                   "Adultstock Vaccine Requirement:", adultstock_vaccine_requirement))      
       # Step 8: Calculate total vaccine requirements
-      total_vaccine_requirement <- round(youngstock_vaccine_requirement + adultstock_vaccine_requirement, 2)
+      total_vaccine_requirement <- round(youngstock_vaccine_requirement + adultstock_vaccine_requirement, 0)
       # Print the total vaccine requirement
       print(paste("Total Vaccine Requirement:", total_vaccine_requirement))
       
@@ -962,11 +963,14 @@ server <- function(input, output, session) {
       results <- rbind(results, data.frame(Country = country,
                                            Year = year,
                                            Specie = specie,
-                                           Population_Value = forecast_value,
-                                           Vaccine_Requirement = format(total_vaccine_requirement, 
-                                                                        big.mark = ",", scientific = FALSE),
-                                           Youngstock_Coverage = round(youngstock_vaccine_requirement,0),  # Actual youngstock to vaccinate
-                                           Adult_Coverage = round(adultstock_vaccine_requirement,0)))       # Actual adults to vaccinate
+                                           Population_Value = format(round(forecast_value),
+                                                                     big.mark = ",", scientific = FALSE, trim = TRUE),
+                                           Vaccine_Requirement = format(round(total_vaccine_requirement), 
+                                                                        big.mark = ",", scientific = FALSE, trim = TRUE),
+                                           Youngstock_Coverage = format(round(youngstock_vaccine_requirement),
+                                                                        big.mark = ",", scientific = FALSE, trim = TRUE),  # Actual youngstock to vaccinate
+                                           Adult_Coverage = format(round(adultstock_vaccine_requirement),
+                                                                   big.mark = ",", scientific = FALSE, trim = TRUE)))       # Actual adults to vaccinate
                                            
     }
     
@@ -1053,7 +1057,8 @@ server <- function(input, output, session) {
     
     # Merge results with density data
     merged <- merge(results, density_data, by.x = c("Country", "Specie"), by.y = c("NAME_0", "Specie"))
-    merged <- merged %>% mutate(Vaccine_Requirement = round((Density / 100) * Vaccine_Requirement, 2))
+    merged <- merged %>% mutate(Vaccine_Requirement = as.numeric(gsub(",", "", Vaccine_Requirement))) %>%
+                         mutate(Vaccine_Requirement = round((Density / 100) * Vaccine_Requirement, 0))
     
     selected_countries <- unique(merged$CNTY)
     
@@ -1181,7 +1186,7 @@ server <- function(input, output, session) {
               tags$tr(tags$th("ADM1_Name"), tags$td(filtered_data$ADM1_Name[i])),
               tags$tr(tags$th("Density"), tags$td(filtered_data$Density[i])),
               tags$tr(tags$th("head_km2"), tags$td(filtered_data$head_km2[i])),
-              tags$tr(tags$th("Vaccine_Requirement"), tags$td(filtered_data$Vaccine_Requirement[i])),
+              tags$tr(tags$th("Vaccine_Requirement_"), tags$td(filtered_data$Vaccine_Requirement[i])),
               tags$tr(tags$th("----"), tags$td("----"))  # Separator row
             )
           })
@@ -1212,7 +1217,7 @@ server <- function(input, output, session) {
             options = list(
               dom = 'Bfrtip',  # Add buttons to the top of the table
               buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
-              columnDefs = list(list(visible = FALSE, targets =c(0,3,4,5,6,7,8,9))  # Hide the first 9 columns 
+              columnDefs = list(list(visible = FALSE, targets =c(0,3,4,6,7,8,9))  # Hide the first 9 columns 
                       ),
               dom = 't',       # Table only (no search, pagination, etc.)
               paging = FALSE,  # No pagination

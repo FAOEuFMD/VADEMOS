@@ -55,7 +55,7 @@ tool <- function() {
                             pickerInput(
                               inputId = "Species",
                               label = "Select Species",
-                              choices = c('Cattle', 'Buffalo', 'Camels', 'Other camelids', 
+                              choices = c('Cattle', 'Buffalo', 'Camels', 
                                           'Goats', 'Sheep', 'Swine / pigs'), #unique(forecast$Specie),
                               options = list(`actions-box` = TRUE,`style`="btn-custom"),
                               multiple = TRUE
