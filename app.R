@@ -334,7 +334,12 @@ server <- function(input, output, session) {
     
     datatable(data, escape = FALSE, extensions = 'Buttons', options = list(
       dom = 'Bfrtip',  # Add buttons to the top of the table
-      buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+      buttons = list(
+        list(extend = 'csv', filename = "VADEMOS_Livestock_Forecast"),
+        list(extend = 'excel', filename = "VADEMOS_Livestock_Forecast"),
+        list(extend = 'pdf', filename = "VADEMOS_Livestock_Forecast"),
+        list(extend = 'print', filename = "VADEMOS_Livestock_Forecast")
+      ),
       pageLength = 10,
       dom = 't',       # 't' stands for table only (removes "Show entries" and search box)
       ordering = FALSE,  # Disable ordering (sorting) of columns
@@ -435,6 +440,7 @@ server <- function(input, output, session) {
   # ----------------------------------
   # # Interactive plot 1: Livestock population
 
+
     output$pops <- renderPlotly({
       
       # Request selected countries and species
@@ -463,9 +469,9 @@ server <- function(input, output, session) {
     # Create the plot
     plot_ly() %>%
       add_trace(data = df1_filtered, x = ~Year, y = ~Value, type = 'scatter', mode = 'lines',
-                split = ~Area,  # This will create separate lines for each country
+                split =  ~interaction(Area, Item),  # This will create separate lines for each country
                 text = ~paste("Country:", Area, "<br>Species:", Item, "<br>Year:", Year, "<br>Value:", Value),
-                hoverinfo = 'text', name = ~paste(Area, 'FAO Stats')) %>%
+                hoverinfo = 'text', name = ~paste(Area, "-", Item, 'FAO Stats')) %>%
       add_trace(data = df2_filtered, x = ~Year, y = ~`Forecasted Value`, type = 'scatter', 
                 mode = 'markers', marker = list(color = '#36454F', size = 7, opacity = 1),
                 text = ~paste("Country:", Country, "<br>Species:", Specie, "<br>Year:", 
@@ -716,95 +722,63 @@ server <- function(input, output, session) {
     )
   })
   
-  
-  
-  
-  
-  # Define a named vector that maps each stage (including intermediate values like 0.5, 1.5, etc.) to a color
-  pcpcolors <- c(
-    "0"= '#fd030e',
-    "0.5" = '#fd030e',  # Red for stage 0.5
-    "1" = '#ef8125',    # Orange for stage 1
-    "1.5" = '#ef8125',  # Orange for stage 1.5
-    "2" = '#fccc19',    # Yellow for stage 2
-    "2.5" = '#fccc19',  # Yellow for stage 2.5
-    "3" = '#4f8e32',    # Green for stage 3
-    "3.5" = '#4f8e32',  # Green for stage 3.5
-    "4" = '#15592b'     # Dark green for stage 4
-  )
-  
-  get_plot_pcp_lines <- function(df) {
-    # Check if 'PCP-FMD Stage' exists in the dataframe
-    if (!"PCP_Stage" %in% colnames(df)) {
-      stop("'PCP_Stage' column is missing in the dataframe")
-    }
-    
-    
-    # Initialize the plot
-    p <- plot_ly()
-    
-    # Get unique countries
-    countries <- unique(df$Country)
-    
-    # Add traces for each country
-    for (i in seq_along(countries)) {
-      country <- countries[i]
-      country_data <- df[df$Country == country, ]
-      
-      # Add a bar trace for the current country
-      p <- p %>%
-        add_bars(
-          data = country_data,
-          x = ~Year,
-          y = ~PCP_Stage_Numeric,
-          color = ~as.factor(PCP_Stage_Numeric),  # Color by PCP Stage
-          colors = pcpcolors,
-          name = country,
-          text = ~paste("PCP Stage:", PCP_Stage),
-          hoverinfo = "text",
-          visible = if (i == 1) TRUE else "legendonly"  # Show only the first country by default
-        )
-    }
-    
-    # Adjust layout to remove dropdown and focus on legend interactivity
-    p <- p %>%
-      layout(
-        title = list(
-          text = "PCP-FMD Progression by Country",
-          x = 0,
-          xanchor = "left"
-        ),
-        xaxis = list(title = "Year"),
-        yaxis = list(
-          title = "PCP-FMD Stage",
-          tickmode = "linear",
-          tickvals = seq(0, 4, by = 0.5),
-          ticktext = as.character(seq(0, 4, by = 0.5)),
-          range = c(0, 4)
-        ),
-        showlegend = TRUE  # Use legend for toggling countries
-      )
-    
-    return(p)
-  }
-  # Server logic
-  output$pcps <- renderPlotly({
-    req(pcp_data())  # Ensure that the reactive function has data
-    
-    # Use the reactive function to get filtered data
-    df <- pcp_data()
-    
-    ## Validate that there is data to plot
-    validate(
-      need(nrow(df) > 0, "No data available to plot as selected Region does not have FMD-PCP Stage. Continue to next step")
+  # Populate the dropdown with countries dynamically
+  observe({
+    req(pcp_data())  # Ensure data is available
+    updateSelectInput(
+      session,
+      inputId = "selected_country",
+      choices = unique(pcp_data()$Country),
+      selected = unique(pcp_data()$Country)[1]  # Default to the first country
     )
-    
-    # Generate the plot using the function defined earlier
-    get_plot_pcp_lines(df)
   })
   
- 
-  
+  # Render the bar chart for the selected country
+  output$pcps <- renderPlotly({
+    req(input$selected_country, pcp_data())  # Ensure a country is selected and data exists
+    
+    # Filter data for the selected country
+    filtered_data <- pcp_data() %>%
+      filter(Country == input$selected_country)
+    
+    # Validate the filtered data
+    validate(
+      need(nrow(filtered_data) > 0, "No data available for the selected country.")
+    )
+    
+    # Create the ggplot bar chart
+    p <- ggplot(filtered_data, aes(x = Year, y = PCP_Stage_Numeric, fill = factor(PCP_Stage_Numeric))) +
+      geom_bar(stat = "identity", color = "black") +
+      scale_fill_manual(values = c(
+        "0" = '#fd030e',
+        "0.5" = '#fd030e',
+        "1" = '#ef8125',
+        "1.5" = '#ef8125',
+        "2" = '#fccc19',
+        "2.5" = '#fccc19',
+        "3" = '#4f8e32',
+        "3.5" = '#4f8e32',
+        "4" = '#15592b'
+      )) +
+      scale_y_continuous(
+        breaks = seq(0, 4, by = 1),  # Show ticks at every 0.5 step
+        limits = c(0, 4)              # Set fixed limits from 0 to 4
+      ) +
+      labs(
+        title = paste("PCP-FMD Progression -", input$selected_country),
+        x = "Year",
+        y = "PCP-FMD Stage",
+        fill = "PCP Stage"
+      ) +
+      theme_minimal() +
+      theme(
+        legend.position = "right",
+        plot.title = element_text(hjust = 1)
+      )
+    
+    # Convert ggplot to a Plotly object for interactivity
+    ggplotly(p)
+  })
   
   
   
@@ -940,12 +914,23 @@ server <- function(input, output, session) {
                          "Cattle" = as.numeric(input$prophylactic_vc_lr) / 100,
                          "Buffalo" = as.numeric(input$prophylactic_vc_lr) / 100,
                          "Camels" = as.numeric(input$prophylactic_vc_lr) / 100,
-                         "Other camelids" = as.numeric(input$prophylactic_vc_lr) / 100,
                          "Goats" = as.numeric(input$prophylactic_vc_sr) / 100,
                          "Sheep" = as.numeric(input$prophylactic_vc_sr) / 100,
                          "Swine / pigs" = as.numeric(input$prophylactic_vc_p) / 100,
                          NA)  # Default case
       print(paste("Coverage:",coverage))
+      
+      # Retrieve coverage percentages based on specie
+      emergency_coverage <- switch(specie,
+                         "Cattle" = as.numeric(input$outbreak_vc_lr) / 100,
+                         "Buffalo" = as.numeric(input$outbreak_vc_lr) / 100,
+                         "Camels" = as.numeric(input$outbreak_vc_lr) / 100,
+                         "Goats" = as.numeric(input$outbreak_vc_sr) / 100,
+                         "Sheep" = as.numeric(input$outbreak_vc_sr) / 100,
+                         "Swine / pigs" = as.numeric(input$outbreak_vc_p) / 100,
+                         NA)  # Default case
+      print(paste("Coverage:",coverage))
+      print(paste("Emergency Coverage:",emergency_coverage))
 
       # Step 6: Calculate vaccine requirements for youngstock and adultstock
       youngstock_vaccine_requirement <- youngstock_value * ys_vac_schedule * coverage
@@ -965,12 +950,20 @@ server <- function(input, output, session) {
                                            Specie = specie,
                                            Population_Value = format(round(forecast_value),
                                                                      big.mark = ",", scientific = FALSE, trim = TRUE),
-                                           Vaccine_Requirement = format(round(total_vaccine_requirement), 
+                                           Prophylactic_Vaccination = format(round(total_vaccine_requirement), 
                                                                         big.mark = ",", scientific = FALSE, trim = TRUE),
                                            Youngstock_Coverage = format(round(youngstock_vaccine_requirement),
-                                                                        big.mark = ",", scientific = FALSE, trim = TRUE),  # Actual youngstock to vaccinate
+                                                                        big.mark = ",", scientific = FALSE, trim = TRUE),  
+                                           # Actual youngstock to vaccinate
                                            Adult_Coverage = format(round(adultstock_vaccine_requirement),
-                                                                   big.mark = ",", scientific = FALSE, trim = TRUE)))       # Actual adults to vaccinate
+                                                                   big.mark = ",", scientific = FALSE, trim = TRUE),
+                                           # Actual adults to vaccinate
+                                          Youngstock_Proportion = ys_prop,
+                                          Adult_Proportion = adult_prop,
+                                          Youngstock_Schedule = ys_vac_schedule,
+                                          Adult_Schedule = adult_vac_schedule,
+                                          Prophylactic_Coverage= coverage,
+                                          Emergency_Coverage = emergency_coverage))
                                            
     }
     
@@ -1013,7 +1006,12 @@ server <- function(input, output, session) {
     output$resultstable <- renderDT({
       datatable(results, extensions = 'Buttons', options = list(
         dom = 'Bfrtip',  # Add buttons to the top of the table
-        buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+        buttons = list(
+          list(extend = 'csv', filename = "VADEMOS_Results"),
+          list(extend = 'excel', filename = "VADEMOS_Results"),
+          list(extend = 'pdf', filename = "VADEMOS_Results"),
+          list(extend = 'print', filename = "VADEMOS_Results")
+        ),
         pageLength = 10,
         dom = 't',       # 't' stands for table only (removes "Show entries" and search box)
         ordering = FALSE,  # Disable ordering (sorting) of columns
@@ -1034,6 +1032,8 @@ server <- function(input, output, session) {
   observeEvent(input$mapbutton, {
     # Show the spinner
     shinyjs::show("loading")
+    req(input$radius)  # Ensure the radius input is available
+    radius_selected <- input$radius
     # Call the get_results function
     results <- shared_results()
     req(results)
@@ -1057,8 +1057,15 @@ server <- function(input, output, session) {
     
     # Merge results with density data
     merged <- merge(results, density_data, by.x = c("Country", "Specie"), by.y = c("NAME_0", "Specie"))
-    merged <- merged %>% mutate(Vaccine_Requirement = as.numeric(gsub(",", "", Vaccine_Requirement))) %>%
-                         mutate(Vaccine_Requirement = round((Density / 100) * Vaccine_Requirement, 0))
+    merged <- merged %>% 
+              mutate(
+              Prophylactic_Vaccination = as.numeric(gsub(",", "", Prophylactic_Vaccination)),
+              Prophylactic_Vaccination = round((Density / 100) * Prophylactic_Vaccination, 0),
+              Area_km2 = pi * (radius_selected^2),  # Area covered in km²
+              Emergency_Youngstock = round(Area_km2 * head_km2 * Youngstock_Proportion / 100 * Youngstock_Schedule * Emergency_Coverage, 0),
+              Emergency_Adult = round(Area_km2 * head_km2 * Adult_Proportion / 100 * Adult_Schedule * Emergency_Coverage, 0),
+              Emergency_Vaccination = Emergency_Youngstock + Emergency_Adult)
+                        
     
     selected_countries <- unique(merged$CNTY)
     
@@ -1177,6 +1184,7 @@ server <- function(input, output, session) {
         filtered_data <- merged %>% filter(ADM1_Name == selected_area())
         print(filtered_data)
         
+        
         output$detailstable <- renderUI({
           # Create a custom HTML table
           tableHTML <- lapply(1:nrow(filtered_data), function(i) {
@@ -1186,7 +1194,8 @@ server <- function(input, output, session) {
               tags$tr(tags$th("ADM1_Name"), tags$td(filtered_data$ADM1_Name[i])),
               tags$tr(tags$th("Density"), tags$td(filtered_data$Density[i])),
               tags$tr(tags$th("head_km2"), tags$td(filtered_data$head_km2[i])),
-              tags$tr(tags$th("Vaccine_Requirement_"), tags$td(filtered_data$Vaccine_Requirement[i])),
+              tags$tr(tags$th("Prophylactic_Vaccination="), tags$td(filtered_data$Prophylactic_Vaccination[i])),
+              tags$tr(tags$th("Emergency_Vaccination="), tags$td(filtered_data$Emergency_Vaccination[i])),
               tags$tr(tags$th("----"), tags$td("----"))  # Separator row
             )
           })
@@ -1208,23 +1217,27 @@ server <- function(input, output, session) {
       
       # Observe full table button and map display
       observeEvent(input$fulltablebutton, {
-      
-        # Render the updated table with the highlighting logic
+        # Select and rearrange columns
+        table_data <- merged %>%
+          dplyr::select(Country, Specie, ADM1_Name, Density, head_km2, Prophylactic_Vaccination, Emergency_Vaccination)
+        
+        # Render the updated table
         output$fulltable <- renderDT({
           datatable(
-            merged,
+            table_data,  # Use the rearranged and filtered dataframe
             extensions = 'Buttons',
             options = list(
               dom = 'Bfrtip',  # Add buttons to the top of the table
-              buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
-              columnDefs = list(list(visible = FALSE, targets =c(0,3,4,6,7,8,9))  # Hide the first 9 columns 
-                      ),
-              dom = 't',       # Table only (no search, pagination, etc.)
+              buttons = list(
+                list(extend = 'csv', filename = "VADEMOS_FullTable"),
+                list(extend = 'excel', filename = "VADEMOS_FullTable"),
+                list(extend = 'pdf', filename = "VADEMOS_FullTable"),
+                list(extend = 'print', filename = "VADEMOS_FullTable")
+              ),#export options
               paging = FALSE,  # No pagination
-              ordering = FALSE  # Disable sorting
-              
-            ) 
-          ) 
+              ordering = TRUE   # Enable sorting (can be disabled if not needed)
+            )
+          )
         })
       })
     

@@ -2,10 +2,8 @@ tool <- function() {
     pageWithSidebar(  
     # App title ----,
         headerPanel(
-        
-          
-          div(h3(" ", align= 'center'))
-             # h3('Vaccine Demand Estimation tool- FMD', align= 'center'), br()),
+         
+          tags$title("")  # Explicitly set the page title
          
     ),#header panel
     
@@ -37,7 +35,7 @@ tool <- function() {
                  column(12,
                  wellPanel(
                    fluidRow(
-                     column(10, h4("STEP 1: Select year, species of interest and country data to obtain population prediction"), br()),
+                     column(10, h4("STEP 1: Select year, species of interest and country data to obtain a prediction of livestock"), br()),
                      
                      
                      column(5,
@@ -66,7 +64,7 @@ tool <- function() {
                      column(4,
                             pickerInput(
                               inputId = "Region",
-                              label = "Select Region",
+                              label = "Select Continent",
                               choices = c('Africa','Americas', 'Asia', 'Europe', 'Oceania'),
                               #unique(data1$CONTINENT),
                               options = list(`actions-box` = TRUE,`style`="btn-custom"),
@@ -103,12 +101,12 @@ tool <- function() {
                  column(12,
                         wellPanel(
                           fluidRow(
-                            column(10, h4("Population Prediction for the selected year, specie and country")),
+                            column(10, h4("Population prediction for the selected year, species and country")),
                             column(12, DTOutput("forecasttable"), style = "font-size:100%"), 
                             HTML("<br><br>"), 
                             column(12, align= 'right',actionButton("edit_values", "Edit Values",
                                                                    class='btn-custom2'), 
-                                   actionButton("save_pops", "Save Edits",
+                                   actionButton("save_pops", "Save Values",
                                                                     class='btn-custom2')),
                             column(12, align = "right", 
                                    textOutput("dynamic_help_text")),
@@ -129,8 +127,8 @@ tool <- function() {
                  column(12,
                  wellPanel(
                      fluidRow(
-                     column(10, h4("STEP 2: Define prophylactic and Emergency vaccination plan"), br()),
-                     column(10, h4("How many times a year preventive vaccines are scheduled?")),
+                     column(10, h4("STEP 2: Define vaccination schedule"), br()),
+                     column(10, h4("Annual vaccination shcedules")),
                      column(4, uiOutput("vschedule_lr_as"), align = "center"),
                      column(4, uiOutput("vschedule_sr_as"), align = "center"),
                      column(4, uiOutput("vschedule_p_as"), align = "center"),
@@ -140,7 +138,7 @@ tool <- function() {
                      column(4, uiOutput("vschedule_p_ys", align = "center"), br()),
                      column(10, br()),
                      
-                     column(10, h4("Population proportion of youngstocks")),
+                     column(10, h4("Population proportion of youngstock")),
                      column(4, uiOutput("ysproplr", align = "center"), br()),
                      column(4, uiOutput("yspropsr", align = "center"), br()),
                      column(4, uiOutput("yspropp", align = "center"), br()),
@@ -154,14 +152,14 @@ tool <- function() {
                    column(12,
                    wellPanel(
                      fluidRow(
-                     column(10, h4("STEP 3: Define PCP-FMD-dependent vaccine coverage")),
+                     column(10, h4("STEP 3: Define vaccine coverage according to PCP-FMD Stage")),
                             br(),
                      column(10, uiOutput("pcp_selected"), br()),
-                     column(10, h4("% of livestocks most likely covered by Prophylactic vaccination")),
+                     column(10, h4("Percentage of livestock covered by prophylactic vaccination")),
                      column(4, uiOutput("prophylactic_vc_lr", align = "center"), br()),
                      column(4, uiOutput("prophylactic_vc_sr", align = "center"), br()),
                      column(4, uiOutput("prophylactic_vc_p", align = "center"), br() ),
-                     column(10, h4("% FMD outbreaks covered by emergency vaccination")),
+                     column(10, h4("Percentage of livestock covered by emergency vaccination")),
                      column(4, uiOutput("outbreak_vc_lr", align = "center"), br()),
                      column(4, uiOutput("outbreak_vc_sr", align = "center"), br()),
                      column(4, uiOutput("outbreak_vc_p", align = "center"), br()),
@@ -184,6 +182,31 @@ tool <- function() {
                             )
                      ),
                      column(12, br()),
+                     fluidRow(
+                       column(
+                         1,  # Add an empty column to create space on the left
+                         ""
+                       ),
+                       column(
+                         4,  # Adjust width for the title
+                         h4("Select a country to see FMD-PCP progression", style = "display: inline;")
+                       ),
+                       column(
+                         3,  # Adjust width for the dropdown
+                         selectInput(
+                           inputId = "selected_country",
+                           label = NULL,  # Remove the label for compactness
+                           choices = NULL,  # We'll populate this dynamically
+                           selected = NULL,
+                           width = "100%"  # Ensure full width within the column
+                         )
+                       ),
+                       column(
+                         4,  # Adjust width for the "Current PCP" text
+                         h4("Current PCP", style = "display: inline;")
+                       )
+                     ),
+                     
                      column(8, plotlyOutput("pcps")), 
                      column(4, DTOutput("pcp_table")),
                     
@@ -195,9 +218,8 @@ tool <- function() {
                    column(12,
                           wellPanel(
                             fluidRow(
-                              column(10, h4("STEP 4: Define Emergency vaccination plan and 
-                                            Outbreaks Information"), br()),
-                              column(8, sliderInput("radius", "Select Emergency Vaccination Radius (km):", 
+                              column(10, h4("STEP 4: Emergency vaccination"), br()),
+                              column(8, sliderInput("radius", "Select radious for emergency vaccination (km):", 
                                                     min = 0, max = 100, value = 10, step = 1, post = " km")),
                               column(12, align = "center", DTOutput("outbreaktable"), style = "font-size:110%"),
                               
@@ -220,7 +242,7 @@ tool <- function() {
                    column(2),
                    # Submit button
                    column(5,
-                          actionButton("resultsbutton", "Get result", class = "btn btn-primary",
+                          actionButton("resultsbutton", "VADEMOS!", class = "btn btn-primary",
                                        icon = icon("arrow-alt-circle-right"),
                                        style = "background-color: #073f23; border-color:transparent")),
                    
@@ -234,7 +256,7 @@ tool <- function() {
         tabPanel("Results",
                  fluidRow( div(id= "results",
                      column(12, br()),
-                     div('Result Table for Prophylactic Vaccination for selected parameters', 
+                     div('Result Table for Prophylactic vaccine dose estimation', 
                      style = "text-align: center; background-color: #FFFFFF; font-weight: bold; 
                      color:black; font-size:150%"),
                      column(12, dataTableOutput("resultstable")%>% withSpinner(type = 5), style = "font-size:102"),
@@ -266,7 +288,7 @@ tool <- function() {
           or concerning the delimitation of its frontiers and boundaries" ', 
                                 style = "text-align: center; background-color: #FFFFFF; font-weight: italic;                                              color:black; font-size:80%")
                      ),
-                     column(4, uiOutput("detailstable")),
+                     column(5, uiOutput("detailstable")),
                      #column(4, dataTableOutput("detailstable")),
                      column(12, br()),  # Space before the button
                      column(12, div(style = "text-align: right;",  # Align button to the right

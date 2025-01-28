@@ -7,30 +7,27 @@
 <p style="font-size:15px">
 <h4>Results</h4>
 
-<h5><b>Prophylactic Vaccination</b></h5>
-<p>The results table provides detailed information on the forecasted vaccination requirements for different countries, years, and species. Here's a breakdown of each column:</p>
+<h4><b>Prophylactic vaccination</b></h4>
+<p>The results table provides detailed information on the predicted vaccination doses for each of the countries, years and species selected. Vaccine dose requirement is divided between youngstock and adults, with the final column identifying the total dose requirement estimated for that country, specie and year. </p>
 
+<h4><b>Emergency vaccination</b></h4>
+<p>The emergency vaccination section provides insights into the vaccine doses required to address potential outbreaks in specific areas. Here's how the calculations are performed and the columns explained:</p>
 <ul>
-  <li><strong>Country</strong>: This column lists the country for which the forecast is made.</li>
-  <li><strong>Year</strong>: This column indicates the specific year for which the forecasted data applies.</li>
-  <li><strong>Species</strong>: This column specifies the type of livestock (e.g., cattle, sheep) for which the forecast is generated.</li>
-  <li><strong>Forecasted Value</strong>: This column shows the predicted population of the specified species in the given country and year, based on historical data and the AutoEnsemble model.</li>
-  <li><strong>Youngstock Coverage</strong>: This column displays the number of vaccine doses required for young livestock (e.g., calves, lambs).</li>
-  <li><strong>Adult Coverage</strong>: This column indicates the number of vaccine doses required for adult livestock.</li>
-  <li><strong>Vaccine Requirement</strong>: This column provides the total estimated number of vaccine doses needed to achieve the forecasted coverage for both youngstock and adult livestock.</li>
-</ul>
 
-<p>By understanding these columns, you can effectively interpret the forecasted vaccination needs and make informed decisions for your livestock management and disease control strategies.</p>
-<br><br>
-
-<h5><b>Emergency Vaccination</b></h5>
-In progress 
+<li><strong>Region (ADM1_Name)</strong>: The administrative region within the country where the emergency vaccination is planned.
+<li><strong>Density</strong>: This column shows the livestock density (percentage of total population) in the specified region, helping to identify high-priority areas.
+<li><strong>Head/km²</strong>:This column indicates the number of livestock per square kilometer in the region, derived from Gridded Livestock of the World (GLW) data.
+<li><strong>Emergency Vaccination</strong>: This column calculates the total vaccine doses needed for the selected radius around an outbreak zone, taking into account:
+The user-specified radius or default 10 km² zone.
+Livestock density within the area, combined with the forecasted population data.
+Emergency vaccination coverage, which adjusts the number of doses based on the proportion of livestock targeted for vaccination during an outbreak.
+<ul>
 <br><br>
 
 <p style="font-size:15px">
-    <a href="https://www.fao.org/contact-us/terms/db-terms-of-use/en">Statistical Database Terms of Use</a>
-    <br>
-    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/igo/"><img title="This work is made available under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 IGO license (CC BY-NC-SA 3.0 IGO; https://creativecommons.org/licenses/by-nc-sa/3.0/igo). In addition to this license, some database specific terms of use are listed: Terms of Use of Datasets." style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/3.0/igo/88x31.png"></a>
+<a href="https://www.fao.org/contact-us/terms/db-terms-of-use/en">Statistical Database Terms of Use</a>
+<br>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/igo/"><img title="This work is made available under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 IGO license (CC BY-NC-SA 3.0 IGO; https://creativecommons.org/licenses/by-nc-sa/3.0/igo). In addition to this license, some database specific terms of use are listed: Terms of Use of Datasets." style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/3.0/igo/88x31.png"></a>
 </p>
 
 </body>
