@@ -716,7 +716,7 @@ server <- function(input, output, session) {
       options = list(
         pageLength = 10, 
         dom = 't', 
-        columnDefs = list(list(visible = FALSE, targets = c(1,3,4,5,7,8,9)))  # Adjust column visibility
+        columnDefs = list(list(visible = FALSE, targets = c(0,1,3,4,5,7,8,9)))  # Adjust column visibility
       ),
       editable = list(target = 'cell', disable = list(columns = 2))
     )
@@ -1037,6 +1037,8 @@ server <- function(input, output, session) {
     # Call the get_results function
     results <- shared_results()
     req(results)
+   
+    
     con <- dbConnect(RMySQL::MySQL(),
                      dbname = Sys.getenv("DB_NAME1"), # or DB_NAME2 if you want the other DB
                      host = Sys.getenv("DB_HOST"),
@@ -1134,6 +1136,7 @@ server <- function(input, output, session) {
         leaflet() %>%
           #setView(lng = -0.027987, lat = 16.263981, zoom = 4) %>%  # Set initial view
           addEsriTiledMapLayer(url = "https://geoservices.un.org/arcgis/rest/services/ClearMap_WebTopo/MapServer") %>%
+         
           
           # Add polygons and assign colors based on Density
           addPolygons(data = merged_sf_data,
@@ -1143,22 +1146,11 @@ server <- function(input, output, session) {
                       fillColor = ~palette(Density),  # Use palette function to color based on Density
                       fillOpacity = 0.7,
                       highlightOptions = highlightOptions(weight = 2, color = "white", fillOpacity = 0.7),
-                      
-                      # # Labels: Format each field on a separate line
-                      # label = ~HTML(paste0(
-                      #   "<strong>Area:</strong> ", ADM1_Name, "<br>",
-                      #   "<strong>Density:</strong> ", Density, "%<br>",
-                      #   "<strong>Vaccine Requirement:</strong> ", Vaccine_Requirement
-                      # )),
-                      # labelOptions = labelOptions(
-                      #   style = list("font-weight" = "normal", padding = "3px 8px"),
-                      #   textsize = "13px",
-                      #   direction = "auto",
-                      #   opacity = 0.9
-                      # ),
                       layerId = ~ADM1_Name
-                      
+
           ) %>%
+            
+          
           
           # Add a legend to represent density-based coloring
           addLegend(pal = palette, values = merged_sf_data$Density, opacity = 0.7, title = "Density", position = "bottomright")

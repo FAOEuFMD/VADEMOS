@@ -128,7 +128,7 @@ tool <- function() {
                  wellPanel(
                      fluidRow(
                      column(10, h4("STEP 2: Define vaccination schedule"), br()),
-                     column(10, h4("Annual vaccination shcedules")),
+                     column(10, h4("Annual vaccination schedules")),
                      column(4, uiOutput("vschedule_lr_as"), align = "center"),
                      column(4, uiOutput("vschedule_sr_as"), align = "center"),
                      column(4, uiOutput("vschedule_p_as"), align = "center"),
@@ -274,6 +274,8 @@ tool <- function() {
          background-color: #FFFFFF; font-weight: bold; color:black; font-size:150%")
                        ))
                      ),
+                     
+                     
                        column(12, div(id = "loading",  # Spinner div
                                       style = "display: none; text-align: center;",
                                       icon("spinner", class = "fa-spin fa-3x"))  # Loading spinner
