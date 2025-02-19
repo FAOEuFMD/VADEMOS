@@ -1,11 +1,11 @@
 name: Vademos_Staging
-title: Vademos_Staging
+title: VADEMOS
 username:
 account: eufmd
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7062564
-bundleId: 8327225
+bundleId: 9824023
 url: https://eufmd.shinyapps.io/Vademos_Staging/
 asMultiple: FALSE
 asStatic: FALSE

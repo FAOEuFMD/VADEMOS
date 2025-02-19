@@ -7,49 +7,37 @@
 ###################################################
 # 0 - Load libraries
 ###################################################
-library(RMySQL) #Mysql connection
+
+library(bslib)
 library(data.table) #reads csv and table functions
-library(readxl)  #reads excels
 library(DBI)
 library(dplyr)
-library(tidyverse)
-library(shiny)
-library(shinythemes)
-library(knitr)
-library(shinyWidgets)
-library(shinydashboard)
 library(DT)
-library(shinyjs)
-library(sodium)
-library(tibble)
-library(rhandsontable)
-library(ggplot2)
-library(ggiraph)  # For interactive graphics
-library(plotly)
-library(sendmailR)
-options(shiny.reactlog=TRUE)
-library(highcharter)
-library(sp)
+library(geojsonio)
+library(glue)
+library(httr)
+library(janitor)
 library(leaflet)
 library(leaflet.extras)
 library(leaflet.esri)
+library(plotly)
 library(raster)
-library(sf)
-library(rworldxtra)
-library(mapboxapi)
-library(tmap)   
-library(remotes)
-library(mapboxer)
-library(shinyscreenshot)
-library(janitor)
-library(glue)
-library(rsconnect)
+library(readxl)  #reads excels
 library(renv)
-library(bslib)
-library(httr)
-library(geojsonio)
+library(rhandsontable)
+library(RMySQL) #Mysql connection
+library(rsconnect)
+library(sf)
+library(shiny)
 library(shinycssloaders)
-
+library(shinylogs)
+library(shinydashboard)
+library(shinyjs)
+library(shinythemes)
+library(shinyWidgets)
+library(sp)
+library(tibble)
+library(tidyverse)
 
 
 
@@ -186,6 +174,44 @@ ui <- fluidPage(
 # 3 Server; R functions that run/respond to UI
 ###################################################
 server <- function(input, output, session) {
+  
+  library(DBI)
+  library(RMySQL)  # Use RPostgres if AWS uses PostgreSQL
+  
+  store_logs_in_db <- function(logs) {
+    # Extract only session-related information
+    session_logs <- logs$session
+    
+    # Convert session_logs to a data frame (if not already)
+    session_logs <- as.data.frame(session_logs)
+    
+    # Keep only required columns (if they exist)
+    required_cols <- c("app", "user", "server_connected", "sessionid", "server_disconnected")
+    session_logs <- session_logs[, intersect(names(session_logs), required_cols), drop = FALSE]
+    
+    # Connect to AWS database
+    con <- dbConnect(
+      MySQL(),  # Use RPostgres() if it's PostgreSQL
+      host = Sys.getenv("DB_HOST"),
+      user = Sys.getenv("DB_USER"),
+      password = Sys.getenv("DB_PASSWORD"),
+      dbname = Sys.getenv("DB_NAME"),
+      port = as.integer(Sys.getenv("DB_PORT"))
+    )
+    
+    # Write logs to the AWS database
+    dbWriteTable(con, "usage", session_logs, append = TRUE, row.names = FALSE)
+    
+    # Close the connection
+    dbDisconnect(con)
+  }
+  
+  # Track usage and store logs in AWS
+  track_usage(
+    storage_mode = store_custom(FUN = function(logs) {
+      store_logs_in_db(logs)  # Pass only session logs to the function
+    })
+  )
   
   ###################About presentation##################  
   # Server part
