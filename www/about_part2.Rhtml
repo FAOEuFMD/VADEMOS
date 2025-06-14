@@ -30,34 +30,34 @@
 <body>
 
 <h2>VADEMOS Parameters Explained</h2>
-<p>VADEMOS is designed to be user-friendly and flexible. Users can input their own data at various stages of the model, including livestock population estimates, vaccination schedules and coverage. The interface allows users to adjust these inputs based on in-country data to ensure that the model can be adapted to local conditions.<p>
+<p>VADEMOS is designed to be user-friendly and flexible. Users can input their own data at various stages of the model, including livestock population estimates, vaccination schedules and coverage. The interface allows users to adjust these inputs based on in-country data to ensure that the model can be adapted to local conditions. Additional information about the input parameters is described below.</p>
 
-<h3>1. Livestock Population Predictions</h3>
-<p>VADEMOS predicts future livestock populations using the AutoEnsemble modeling technique. This approach combines multiple forecasting models to produce more reliable estimates.</p>
-<p>In cases where not enough data is available to model predictions or when the forecasted values fall outside the confidence intervals (CI), the model defaults to the most recent data available from FAOSTAT (2023). This ensures that even when predictions are uncertain, the estimates remain grounded in the latest actual data. If there are more accurate or up to data values available for a country’s livestock populations, these can be added manually by the user.</p>
+<h3>1. Livestock population predictions</h3>
+<p>VADEMOS predicts future livestock populations using an automated machine learning algorithm. This approach combines multiple forecasting models to produce more reliable estimates.</p>
+<p>Sometimes the model cannot provide a suitable prediction based on the historical population data available. In these cases the model defaults to the most recent data available from FAOSTAT. If there are more accurate or up to data values available for a country’s livestock populations, these can be added manually by the user.</p>
 
-<h3>2. Vaccination Schedules</h3>
-<p>VADEMOS includes the frequency of vaccination required to maintain immunity, as well as the appropriate primary course. The number of vaccines required annually are entered based on livestock species and age stage (divided between youngstock and adults).  </p>
+<h3>2. Vaccination schedules</h3>
+<p>VADEMOS includes the frequency of vaccination required to maintain immunity, as well as the appropriate primary course. The number of vaccines required annually is entered based on livestock species and age stage (divided between youngstock and adults).</p>
 
 
 <h3>3. Age-disaggregated livestock populations</h3>
-<p>VADEMOS divides the total livestock population into youngstock and adults based on species-specific proportions</p>
-
+<p>VADEMOS divides the total livestock population into youngstock and adults based on species-specific proportions.</p>
+<ul>
     <li><strong>Youngstock:</strong> refers to animals that are likely to require a different primary vaccination protocol as their maternal immunity decreases.</li>
+</ul>
     
 <h3>4.The Progressive Control Pathway for Foot-and-Mouth Disease (PCP-FMD) </h3>
-<p>The PCP-FMD is a strategic framework used to support countries with endemic FMD to progressively control disease.  In order to identify the proportion of a livestock population that would be routinely covered by prophylactic vaccination, or that would be expected to be vaccinated in response to an outbreak, VADEMOS uses values that were defined by expert opinion for each PCP-FMD Stage</p>
+<p>The PCP-FMD is a strategic framework used to support countries with endemic FMD to progressively control disease.  To identify the proportion of a livestock population that would be routinely covered by prophylactic vaccination, or that would be expected to be vaccinated in response to an outbreak, VADEMOS uses values that were defined by expert opinion for each PCP-FMD Stage</p>
 
-<h3>5. Livestock Population Density</h3>
+<h3>5. Livestock population density</h3>
 <p>Population density is analyzed using data from the Global Livestock Production and Health Atlas (GLW4). This data provides detailed insights into livestock concentrations across various regions. The analysis focuses on calculating the percentage of animal densities per species within administrative regions.</p>
 <p>The density data is processed using Geographic Information Systems (GIS) tools to create a structured understanding of livestock distributions, which informs both prophylactic and emergency vaccination strategies.</p>
 
-<h3>6. Vaccination Radius</h3>
-<p>The vaccination radius defines the zone in which all livestock will be vaccinated in response to an outbreak. VADEMOS allows this value to be adjusted between 0km and 100km.<p>
+<h3>6. Vaccination radius</h3>
+<p>The vaccination radius defines the zone in which all livestock will be vaccinated in response to an outbreak. VADEMOS allows this value to be adjusted between 0km and 100km.</p>
 
-<h3>7. Outbreaks</h3>
-<p>Previous FMD outbreak numbers were collated from WOAH WAHIS and national statistical databases. 
-These outbreak data are based on each country’s surveillance and reporting. Countries in lower PCP-FMD stages often have limited FMD surveillance and therefore outbreaks are likely to be underreported.  </p>
+
+
 
 </body>
 </html>

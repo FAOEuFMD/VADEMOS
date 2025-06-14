@@ -18,10 +18,10 @@ tool <- function() {
         ) #tabpanel
     )  #tabsetpanel
     ), #SidebarPanel
-    
-    # Main panel for displaying modeling outputs --
+      # Main panel for displaying modeling outputs --
     mainPanel( width = 9, 
                h3('VADEMOS','Vaccine Demand Estimation tool- FMD', align= 'left'),
+               p("At the bottom of each section there is a help button. Click on this to get additional support for the step of the tool you are using. This information will be displayed to the left of the screen."),
       # Output1: Tabs to show estimated future inputs: populations, outbreaks, pcp projections
       tabsetPanel(
         id="maintabset",
@@ -220,9 +220,7 @@ tool <- function() {
                             fluidRow(
                               column(10, h4("STEP 4: Emergency vaccination"), br()),
                               column(8, sliderInput("radius", "Select radious for emergency vaccination (km):", 
-                                                    min = 0, max = 100, value = 10, step = 1, post = " km")),
-                              column(12, align = "center", DTOutput("outbreaktable"), style = "font-size:110%"),
-                              
+                                                    min = 0, max = 100, value = 10, step = 1, post = " km")),                                            
                               column(10, actionButton("help4", "Help", class='btn-custom2'))
                            
                               

@@ -42,7 +42,7 @@ library(tidyverse)
 
 
 ###################################################
-# 1 - Source Data
+# 1 - Establish Connection 
 ###################################################
 # Load environment variables credentials in the .Renviron file
 db_host <- Sys.getenv("DB_HOST")
@@ -55,14 +55,9 @@ db_name <- Sys.getenv("DB_NAME")
 db_name2 <- Sys.getenv("DB_NAME2")
 
 ###################################################
-# 2 - Establish Connection
+# 2 - Source Data
 ###################################################
 
-#pcp<-read_excel("pcp_2024.xlsx")
-outbreak<-read_excel("Outbreaks_Wahis.xlsx")
-# Replace '-' with 0 and transform the Cases column to numeric (integer)
-outbreak$Cases <- as.integer(gsub("-", "0", outbreak$Cases))
-outbreak$Outbreaks <- as.integer(gsub("-", "0", outbreak$`New outbreaks`))
 
 delphi <- read.csv('delphi-round1.csv')
 
@@ -372,9 +367,9 @@ server <- function(input, output, session) {
       paging = FALSE,    # Disable pagination
       scrollX = TRUE,
       # Hide the 'ID' column
-      columnDefs = list(list(visible = FALSE, targets = 1))),
-      editable = list(target = 'cell', disable = list(columns = c(0,1,2,3,4,6,7,8,9,10)))
-  )
+      columnDefs = list(list(visible = FALSE, targets = c(1,10))),
+      editable = list(target = 'cell', disable = list(columns = c(0,1,2,3,4,6,7,8,9,10)))))
+  
   })
   
   # Reactive value to store help text
@@ -817,43 +812,9 @@ server <- function(input, output, session) {
    
   })
   
-  # Reactive expression to filter forecast data based on year and country selections
-  outbreaks_data <- reactive({
-    req(input$Country, input$Species)  # Ensure both inputs are available
-    
-    # Filter the outbreak data based on the selected country and species
-    result <- outbreak %>%
-      filter(Country %in% input$Country, 
-             Species %in% input$Species)  # Filter by both country and species
-    
-    return(result)
-  })
   
   
-  # Render the outbreaks table
-  output$outbreaktable <- renderDT({
-    # Replace NA with 0, convert to numeric, and handle non-numeric values
-    outbreaks_summary <- outbreaks_data() %>%
-      # Filter out rows where 'New Outbreaks' or 'Cases' could not be coerced to numeric
-      filter(!is.na(Outbreaks) & !is.na(Cases)) %>%
-      group_by(Country, Species) %>%
-      summarize(
-        `Average Outbreaks` = round(mean(Outbreaks, na.rm = TRUE),0),
-        `Average Cases` = round(mean(Cases, na.rm = TRUE),0),
-        .groups = 'drop'  # Ungroup after summarizing to avoid grouped output
-      )
-    
-    # Select and arrange the columns to display in the DataTable
-    outbreaks_summary %>%
-      dplyr::select(Country, Species, `Average Outbreaks`, `Average Cases`)
-  }, options = list(
-    pageLength = 10,
-    dom = 't',       # 't' stands for table only (removes "Show entries" and search box)
-    ordering = FALSE,         # Disable ordering (sorting) of columns
-    paging = FALSE,           # Disable pagination
-    scrollX = TRUE
-  ), editable = FALSE)
-  # ----------------------------------
+  
   
   
 ####################################################################
@@ -974,7 +935,7 @@ server <- function(input, output, session) {
       results <- rbind(results, data.frame(Country = country,
                                            Year = year,
                                            Specie = specie,
-                                           Population_Value = format(round(forecast_value),
+                                           Population_Value= format(round(forecast_value),
                                                                      big.mark = ",", scientific = FALSE, trim = TRUE),
                                            Prophylactic_Vaccination = format(round(total_vaccine_requirement), 
                                                                         big.mark = ",", scientific = FALSE, trim = TRUE),
@@ -988,11 +949,27 @@ server <- function(input, output, session) {
                                           Adult_Proportion = adult_prop,
                                           Youngstock_Schedule = ys_vac_schedule,
                                           Adult_Schedule = adult_vac_schedule,
-                                          Prophylactic_Coverage= coverage,
-                                          Emergency_Coverage = emergency_coverage))
+                                          Prophylactic_Coverage= (coverage *100),
+                                          Emergency_Coverage = emergency_coverage
+                                        ))
                                            
     }
-    
+    # Rename all columns at once
+    colnames(results) <- c(
+  "Country",
+  "Year", 
+  "Specie",
+  "Population (head)",
+  "Prophylactic Vaccination (doses)",
+  "Youngstock Vaccination (doses)",
+  "Adult Vaccination (doses)", 
+  "Youngstock Proportion (%)",
+  "Adult Proportion (%)",
+  "Youngstock Schedule",
+  "Adult Schedule",
+  "Prophylactic Coverage (%)",
+  "Emergency Coverage (%)"
+)
     print("Final results:")
     print(results)
     
@@ -1087,11 +1064,11 @@ server <- function(input, output, session) {
     merged <- merge(results, density_data, by.x = c("Country", "Specie"), by.y = c("NAME_0", "Specie"))
     merged <- merged %>% 
               mutate(
-              Prophylactic_Vaccination = as.numeric(gsub(",", "", Prophylactic_Vaccination)),
+              Prophylactic_Vaccination = as.numeric(gsub(",", "", `Prophylactic Vaccination (doses)`)),
               Prophylactic_Vaccination = round((Density / 100) * Prophylactic_Vaccination, 0),
               Area_km2 = pi * (radius_selected^2),  # Area covered in km²
-              Emergency_Youngstock = round(Area_km2 * head_km2 * Youngstock_Proportion / 100 * Youngstock_Schedule * Emergency_Coverage, 0),
-              Emergency_Adult = round(Area_km2 * head_km2 * Adult_Proportion / 100 * Adult_Schedule * Emergency_Coverage, 0),
+              Emergency_Youngstock = round(Area_km2 * head_km2 * `Youngstock Proportion (%)` / 100 * `Youngstock Schedule` *`Emergency Coverage (%)`, 0),
+              Emergency_Adult = round(Area_km2 * head_km2 * `Adult Proportion (%)` / 100 * `Adult Schedule` * `Emergency Coverage (%)`, 0),
               Emergency_Vaccination = Emergency_Youngstock + Emergency_Adult)
                         
     

@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run VADEMOS Shiny App",
+			"type": "shell",
+			"command": "R",
+			"args": [
+				"-e",
+				"renv::restore(); shiny::runApp('app.R', host='127.0.0.1', port=3838, launch.browser=TRUE)"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
