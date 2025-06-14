@@ -254,7 +254,7 @@ tool <- function() {
         tabPanel("Results",
                  fluidRow( div(id= "results",
                      column(12, br()),
-                     div('Result Table for Prophylactic vaccine dose estimation', 
+                     div('Result table for prophylactic vaccine dose estimation', 
                      style = "text-align: center; background-color: #FFFFFF; font-weight: bold; 
                      color:black; font-size:150%"),
                      column(12, dataTableOutput("resultstable")%>% withSpinner(type = 5), style = "font-size:102"),

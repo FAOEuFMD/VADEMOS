@@ -186,7 +186,7 @@ server <- function(input, output, session) {
     
     # Connect to AWS database
     con <- dbConnect(
-      MySQL(),  # Use RPostgres() if it's PostgreSQL
+      MySQL(),  
       host = Sys.getenv("DB_HOST"),
       user = Sys.getenv("DB_USER"),
       password = Sys.getenv("DB_PASSWORD"),
@@ -950,7 +950,7 @@ server <- function(input, output, session) {
                                           Youngstock_Schedule = ys_vac_schedule,
                                           Adult_Schedule = adult_vac_schedule,
                                           Prophylactic_Coverage= (coverage *100),
-                                          Emergency_Coverage = emergency_coverage
+                                          Emergency_Coverage = (emergency_coverage *100)
                                         ))
                                            
     }
