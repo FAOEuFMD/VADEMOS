@@ -1,7 +1,0 @@
-{
-    "installOptions": {
-        "installFromRepository": true,
-        "libraryPath": "C:/Users/CondoleoR/Documents/R/R-4.1.1/library",
-        "installDependencies": true
-    }
-}
