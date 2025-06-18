@@ -10,7 +10,7 @@
 <h2>VADEMOS Mathematical Models</h2>
 
 <h3>1. Livestock Population Prediction</h3>
-<p>The model predicts population for each species using time series methods (AutoEnsemble) based on FAOSTAT data. If the prediction falls outside the confidence interval, it defaults to the last available population value (2023).</p>
+<p>The model predicts population for each species using time series methods (AutoEnsemble) based on FAOSTAT data. If the prediction falls outside the confidence interval, it defaults to the last available population value.</p>
 <div class="equation">
 P<sub>t,c,s</sub> = AutoEnsemble(X<sub>c,s</sub>),<br>
 if P<sub>t,c,s</sub> &isin; [CI_L, CI_U],<br>
@@ -61,10 +61,10 @@ Mean Density = (Σ (Livestock Population per Pixel × Area of Pixel)) / (Σ Area
 <h3>7. Density Percentage of the Administrative Area</h3>
 <p>The density percentage of the administrative area is determined by comparing the livestock population density within the area to the total area:</p>
 <div class="equation">
-Density Percentage = (Total Livestock Population in Area / Total Area) × 100
+Density Percentage = ((Total Livestock Population in Area / Total Area) × 100)
 </div>
 
-<h3>7. Emergency Vaccination Requirement</h3>
+<h3>8. Emergency Vaccination Requirement</h3>
 <p>The emergency vaccination requirement is calculated based on the input radius and the mean animal count per km2 of the administrative area:</p>
 <div class="equation">
 Emergency Vaccination Requirement = π × radius² × head_km2

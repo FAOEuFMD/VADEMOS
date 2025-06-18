@@ -7,26 +7,55 @@
 
 <h4>Results</h4>
 
-<h4><b>Prophylactic vaccination</b></h4>
-<p>The results table provides detailed information on the predicted vaccination doses for each of the countries, years and species selected. Vaccine dose requirement is divided between youngstock and adults, with the final column identifying the total dose requirement estimated for that country, species and year.</p>
-
-<h4><b>Emergency vaccination</b></h4>
-<p>A figure for emergency vaccination is calculated for each administrative region, based on livestock density and the radius selected. This value is calculated for a single outbreak – it should then be multiplied by the number of outbreaks that the user predicts will occur in the time period under question.</p>
-
-<h4><b>Map</b></h4>
-<p>When you click on "See Map", you will see how vaccine doses are distributed according to regional livestock density in the countries selected. To see how many vaccines would be needed for the years you have identified in the parameters page click on the region you are interested in.</p>
-
-<p>When you click on a region of the map, the following information is available, in addition to the country and the species selected:</p>
-
+<h4><b>Results Table - Prophylactic Vaccination</b></h4>
+<p>The main results table shows prophylactic vaccination requirements for each selected country, species, and year. The information includes:</p>
 <ul>
-<li><strong>ADM1_Name</strong>: This is the name of the administrative region within the country.</li>
-<li><strong>Density</strong>: This is the percentage of the country's total population of the species selected in the specified administrative region.</li>
-<li><strong>Head_km²</strong>: This is the number of livestock per square kilometre in the administrative region, derived from Gridded Livestock of the World (GLW) data.</li>
-<li><strong>Prophylactic Vaccination</strong>: This is the number of vaccine doses required for a prophylactic vaccination programme for the species and administrative region selected, taking into account the input parameters selected by the user on the previous page.</li>
-<li><strong>Emergency Vaccination</strong>: This is the number of vaccine doses required for ring vaccination around one outbreak for the species and administrative region selected.</li>
+<li><strong>Population</strong>: Total livestock head count for the selected country, species, and year</li>
+<li><strong>Prophylactic Vaccination (doses)</strong>: Total number of vaccine doses required</li>
+<li><strong>Youngstock Vaccination (doses)</strong>: Vaccine doses needed for young animals</li>
+<li><strong>Adult Vaccination (doses)</strong>: Vaccine doses needed for adult animals</li>
+<li><strong>Proportion and Coverage</strong>: Percentages used in calculations</li>
 </ul>
 
-<p>If you click "See full table" a table will appear with this information for all of the administrative regions selected. This table can be downloaded using the buttons on the top left hand side. You can use the search function to search within the table for specific regions or species.</p>
+<h4><b>Map View - Regional Distribution</b></h4>
+<p>After reviewing the prophylactic vaccination requirements, click the <strong>"See/Update Map"</strong> button to view regional distribution. This step is essential for seeing emergency vaccination needs.</p>
+
+<p>The map shows:</p>
+<ul>
+<li>Color-coded regions based on livestock density</li>
+<li>Detailed information for each administrative region</li>
+<li>Regional vaccine needs for both prophylactic and emergency vaccination</li>
+</ul>
+
+<h4><b>Emergency Vaccination</b></h4>
+<p>Emergency vaccination requirements are only visible after clicking the "See/Update Map" button. The calculation is based on:</p>
+<ul>
+<li>The ring vaccination radius you selected (determining the area covered)</li>
+<li>Livestock density in each administrative region</li>
+<li>The proportions and coverage settings from your parameters</li>
+</ul>
+<p>The emergency vaccination figure represents doses needed for <strong>a single outbreak</strong>. For multiple outbreaks, multiply this number by your expected outbreak count.</p>
+
+<h4><b>Regional Details</b></h4>
+<p>When you click on any region in the map, a detailed information table appears showing:</p>
+<ul>
+<li><strong>Country</strong>: The country selected</li>
+<li><strong>Species</strong>: The livestock species</li>
+<li><strong>ADM1_Name</strong>: The administrative region name</li>
+<li><strong>Density</strong>: Percentage of the country's total population for this species in this region</li>
+<li><strong>Head_km²</strong>: Livestock density (animals per square kilometer)</li>
+<li><strong>Prophylactic Vaccination (doses)</strong>: Required doses by year for systematic vaccination</li>
+<li><strong>Emergency Vaccination (doses)</strong>: Required doses by year for emergency response</li>
+</ul>
+
+<h4><b>Full Table View</b></h4>
+<p>Click the <strong>"See/Update Full Table"</strong> button below the map to view comprehensive data for all administrative regions. This consolidated table:</p>
+<ul>
+<li>Shows all regions across selected countries</li>
+<li>Displays vaccination needs for all selected years in a single row per region</li>
+<li>Can be downloaded using the buttons at the top</li>
+<li>Includes search functionality to locate specific regions or data points</li>
+</ul>
 
 <br><br>
 
