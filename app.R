@@ -353,7 +353,8 @@ server <- function(input, output, session) {
     
     
     
-    datatable(data, escape = FALSE, extensions = 'Buttons', options = list(
+    datatable(data, escape = FALSE, extensions = 'Buttons', editable = list(target = 'cell', disable = list(columns = c(0,1,2,3,4,6,7,8,9,10))),
+    options = list(
       dom = 'Bfrtip',  # Add buttons to the top of the table
       buttons = list(
         list(extend = 'csv', filename = "VADEMOS_Livestock_Forecast"),
@@ -367,8 +368,7 @@ server <- function(input, output, session) {
       paging = FALSE,    # Disable pagination
       scrollX = TRUE,
       # Hide the 'ID' column
-      columnDefs = list(list(visible = FALSE, targets = c(1,10))),
-      editable = list(target = 'cell', disable = list(columns = c(0,1,2,3,4,6,7,8,9,10)))))
+      columnDefs = list(list(visible = FALSE, targets = c(1,10)))))
   
   })
   
@@ -1070,8 +1070,15 @@ server <- function(input, output, session) {
               Emergency_Youngstock = round(Area_km2 * head_km2 * `Youngstock Proportion (%)` / 100 * `Youngstock Schedule` *`Emergency Coverage (%)`, 0),
               Emergency_Adult = round(Area_km2 * head_km2 * `Adult Proportion (%)` / 100 * `Adult Schedule` * `Emergency Coverage (%)`, 0),
               Emergency_Vaccination = Emergency_Youngstock + Emergency_Adult)
-                        
-    
+
+    # Collapse by ADM1_Name, Country, Specie
+    merged_summary <- merged %>%
+      group_by(Country, Specie, ADM1_Name, Density, head_km2) %>%
+      summarise(
+        Prophylactic_Vaccination = paste(paste(Year, ':', Prophylactic_Vaccination), collapse = '<br>'),
+        Emergency_Vaccination = paste(paste(Year, ':', Emergency_Vaccination), collapse = '<br>'),
+        .groups = 'drop'
+      )
     selected_countries <- unique(merged$CNTY)
     
   
@@ -1176,7 +1183,7 @@ server <- function(input, output, session) {
         selected_area(area_id)
         
         # Filter data based on the selected area
-        filtered_data <- merged %>% filter(ADM1_Name == selected_area())
+        filtered_data <- merged_summary %>% filter(ADM1_Name == selected_area())
         print(filtered_data)
         
         
@@ -1188,10 +1195,9 @@ server <- function(input, output, session) {
               tags$tr(tags$th("Specie"), tags$td(filtered_data$Specie[i])),
               tags$tr(tags$th("ADM1_Name"), tags$td(filtered_data$ADM1_Name[i])),
               tags$tr(tags$th("Density"), tags$td(filtered_data$Density[i])),
-              tags$tr(tags$th("head_km2"), tags$td(filtered_data$head_km2[i])),
-              tags$tr(tags$th("Prophylactic_Vaccination="), tags$td(filtered_data$Prophylactic_Vaccination[i])),
-              tags$tr(tags$th("Emergency_Vaccination="), tags$td(filtered_data$Emergency_Vaccination[i])),
-              tags$tr(tags$th("----"), tags$td("----"))  # Separator row
+              tags$tr(tags$th("Head_km2"), tags$td(filtered_data$head_km2[i])),
+              tags$tr(tags$th("Prophylactic Vaccination (doses)"), tags$td(HTML(filtered_data$Prophylactic_Vaccination[i]))),
+              tags$tr(tags$th("Emergency Vaccination (doses)"), tags$td(HTML(filtered_data$Emergency_Vaccination[i])))
             )
           })
           do.call(tagList, tableHTML)
@@ -1212,14 +1218,24 @@ server <- function(input, output, session) {
       
       # Observe full table button and map display
       observeEvent(input$fulltablebutton, {
-        # Select and rearrange columns
+        # Reshape merged to wide format for years, using consistent column names
+        library(tidyr)
+        library(dplyr)
         table_data <- merged %>%
-          dplyr::select(Country, Specie, ADM1_Name, Density, head_km2, Prophylactic_Vaccination, Emergency_Vaccination)
-        
+          dplyr::select(Country, Specie, ADM1_Name, Year, Prophylactic_Vaccination, Emergency_Vaccination) %>%
+          tidyr::pivot_wider(
+            id_cols = c(Country, Specie, ADM1_Name),
+            names_from = Year,
+            values_from = c(Prophylactic_Vaccination, Emergency_Vaccination),
+            names_glue = "{.value} ({Year})"
+          )
+        # Rename columns for consistency
+        colnames(table_data) <- gsub("Prophylactic_Vaccination", "Prophylactic Vaccination (doses)", colnames(table_data))
+        colnames(table_data) <- gsub("Emergency_Vaccination", "Emergency Vaccination (doses)", colnames(table_data))
         # Render the updated table
         output$fulltable <- renderDT({
           datatable(
-            table_data,  # Use the rearranged and filtered dataframe
+            table_data,  # Use the wide-format dataframe
             extensions = 'Buttons',
             options = list(
               dom = 'Bfrtip',  # Add buttons to the top of the table
