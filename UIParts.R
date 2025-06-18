@@ -12,7 +12,7 @@ tool <- function() {
     sidebarPanel( width= 3,
                   class = "sticky-sidebar",
       tabsetPanel(
-        tabPanel("Help",
+        tabPanel("Help Section",
                  style="text-align: justify;",
                  uiOutput("help_content")
         ) #tabpanel
@@ -180,7 +180,7 @@ tool <- function() {
                             conditionalPanel(
                               condition = "input.Region.includes('Europe') || input.Region.includes('Americas') || input.Region.includes('Oceania')",
                               div(class = "help_texts",
-                                  h5("One or more regions in your selection do not have an FMD-PCP Stage. Please select coverage.")
+                                  h5("One or more regions in your selection do not have an PCP-FMD Stage. Please select coverage.")
                               )
                             )
                      ),
@@ -192,7 +192,7 @@ tool <- function() {
                        ),
                        column(
                          4,  # Adjust width for the title
-                         h4("Select a country to see FMD-PCP progression", style = "display: inline;")
+                         h4("Select a country to see PCP-FMD progression", style = "display: inline;")
                        ),
                        column(
                          3,  # Adjust width for the dropdown
@@ -270,7 +270,7 @@ tool <- function() {
                        column(12, br()),  # Space between the button and the text
                        column(12, conditionalPanel(
                          condition = "input.mapbutton > 0",  # Show text only after button is clicked
-                         div('Select area to view density,prophylactic and emergency vaccination', 
+                         div('Select area to view density, prophylactic and emergency vaccination', 
                          style = "text-align: left; 
          background-color: #FFFFFF; font-weight: bold; color:black; font-size:150%")
                        ))

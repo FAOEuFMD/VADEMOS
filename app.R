@@ -551,7 +551,7 @@ server <- function(input, output, session) {
   # youngstock proportion
   
   output$ysproplr <- renderUI({
-    sliderInput("ysproplr","Large Ruminants (< 12 months)",
+    sliderInput("ysproplr","Large ruminants (< 12 months)",
                 min=0, max=100,
                 value=30,
                 step=1,
@@ -559,7 +559,7 @@ server <- function(input, output, session) {
   }) #renderUI
   
   output$yspropsr <- renderUI({
-    sliderInput("yspropsr","Small Ruminants (< 12 months)",
+    sliderInput("yspropsr","Small ruminants (< 12 months)",
                 min=0, max=100,
                 value=20,
                 step=1,
