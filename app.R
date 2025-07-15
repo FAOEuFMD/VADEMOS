@@ -517,7 +517,7 @@ server <- function(input, output, session) {
       selectInput(
         inputId = paste0("vschedule_", tolower(species), "_", tolower(schedule_type)),
         label = label,
-        choices = c("1", "2"),
+        choices = c("1", "2", "3", "4"),  # Now allowing up to 4 doses per year
         selected = default_value  # Default selection
       )
     })
@@ -1067,16 +1067,16 @@ server <- function(input, output, session) {
               Prophylactic_Vaccination = as.numeric(gsub(",", "", `Prophylactic Vaccination (doses)`)),
               Prophylactic_Vaccination = round((Density / 100) * Prophylactic_Vaccination, 0),
               Area_km2 = pi * (radius_selected^2),  # Area covered in km²
-              Emergency_Youngstock = round(Area_km2 * head_km2 * `Youngstock Proportion (%)` / 100 * `Youngstock Schedule` *`Emergency Coverage (%)`, 0),
-              Emergency_Adult = round(Area_km2 * head_km2 * `Adult Proportion (%)` / 100 * `Adult Schedule` * `Emergency Coverage (%)`, 0),
+              Emergency_Youngstock = round(Area_km2 * head_km2 * `Youngstock Proportion (%)` / 100 * `Youngstock Schedule` * `Emergency Coverage (%)` / 100, 0),
+              Emergency_Adult = round(Area_km2 * head_km2 * `Adult Proportion (%)` / 100 * `Adult Schedule` * `Emergency Coverage (%)` / 100, 0),
               Emergency_Vaccination = Emergency_Youngstock + Emergency_Adult)
 
     # Collapse by ADM1_Name, Country, Specie
     merged_summary <- merged %>%
       group_by(Country, Specie, ADM1_Name, Density, head_km2) %>%
       summarise(
-        Prophylactic_Vaccination = paste(paste(Year, ':', Prophylactic_Vaccination), collapse = '<br>'),
-        Emergency_Vaccination = paste(paste(Year, ':', Emergency_Vaccination), collapse = '<br>'),
+        Prophylactic_Vaccination = paste(paste(Year, ':', format(Prophylactic_Vaccination, big.mark = ",", scientific = FALSE, trim = TRUE)), collapse = '<br>'),
+        Emergency_Vaccination = format(sum(Emergency_Vaccination, na.rm = TRUE), big.mark = ",", scientific = FALSE, trim = TRUE),
         .groups = 'drop'
       )
     selected_countries <- unique(merged$CNTY)
@@ -1197,7 +1197,9 @@ server <- function(input, output, session) {
               tags$tr(tags$th("Density"), tags$td(filtered_data$Density[i])),
               tags$tr(tags$th("Head_km2"), tags$td(filtered_data$head_km2[i])),
               tags$tr(tags$th("Prophylactic Vaccination (doses)"), tags$td(HTML(filtered_data$Prophylactic_Vaccination[i]))),
-              tags$tr(tags$th("Emergency Vaccination (doses)"), tags$td(HTML(filtered_data$Emergency_Vaccination[i])))
+              tags$tr(tags$th("Emergency Vaccination (doses)"), tags$td(HTML(filtered_data$Emergency_Vaccination[i]))),
+              tags$tr(tags$td(colspan = 2, style = "color: #888; font-size: 12px; padding-top: 8px;",
+                "Emergency vaccination is calculated using the latest available density data and does not account for annual population predictions."))
             )
           })
           do.call(tagList, tableHTML)
