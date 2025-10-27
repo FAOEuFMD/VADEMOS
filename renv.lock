@@ -688,6 +688,18 @@
       ],
       "Hash": "15e9634c0fcd294799e9b2e929ed1b86"
     },
+    "geodata": {
+      "Package": "geodata",
+      "Version": "0.6-6",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "rappdirs",
+        "terra"
+      ],
+      "Hash": "74b7fc481d732812ec105e2c6ee40051"
+    },
     "geojson": {
       "Package": "geojson",
       "Version": "0.3.5",

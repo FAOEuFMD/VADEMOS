@@ -13,6 +13,7 @@ library(data.table) #reads csv and table functions
 library(DBI)
 library(dplyr)
 library(DT)
+library(geodata)
 library(geojsonio)
 library(glue)
 library(httr)
@@ -1083,46 +1084,26 @@ server <- function(input, output, session) {
     
   
     
-    ##########################code to fetch from API#########################################3
-    CNTY_filter <-CNTY_filter <- paste(sprintf("'%s'", selected_countries), collapse = ", ")
-    CNTY_filter <- gsub(" ", "", CNTY_filter)  # Remove any spaces
-
-    # Debug: Print the filter to ensure it's correct
-    print(paste("CNTY Filter:",CNTY_filter))
-
-    # Manually construct the polygon URL with the filter
-
-    polygon_url <- sprintf(
-      "https://geoservices.un.org/arcgis/rest/services/ClearMap_WebTopo/MapServer/110/query?where=CNTY%%20IN%%20(%s)&outFields=CNTY,ADM1_Name&returnGeometry=true&f=geojson",CNTY_filter)
-    #Debug: Print the constructed URL
-    print(paste("Constructed Polygon URL:", polygon_url))
-
-    #polygon_url <- "https://geoservices.un.org/arcgis/rest/services/ClearMap_WebTopo/MapServer/110/query?where     =CNTY='TCD'&outFields=CNTY,ADM1_Name&returnGeometry=true&f=geojson"
-
-    # Fetch polygon data with error handling
+    ##########################code to fetch from GADM#########################################
+    # Fetch administrative boundaries from GADM
     tryCatch({
-       response <- GET(polygon_url)
-       geojson_text <- content(response, as = "text", type = "application/geo+json")
-       # Validate and convert to sf object
-       geojson_data <- jsonlite::fromJSON(geojson_text, simplifyVector = FALSE)
+      # Download GADM data for each selected country at level 1 (admin1)
+      sf_data_list <- lapply(selected_countries, function(country) {
+        gadm_data <- geodata::gadm(country = country, level = 1, path = tempdir())
+        sf::st_as_sf(gadm_data)
+      })
+      # Combine into one sf object
+      sf_data <- do.call(rbind, sf_data_list)
+      # Rename columns to match expected fields
+      sf_data <- sf_data %>% rename(CNTY = GID_0, ADM1_Name = NAME_1)
+      # Filter the sf_data based on selected countries
+      sf_data <- sf_data %>% filter(CNTY %in% selected_countries)
 
-
-    if (is.null(geojson_data$features) || length(geojson_data$features) == 0) {
-      shinyjs::hide("loading")
-      showNotification("No polygons available for the selected countries.", type = "warning")
-      return()
-    }
-
-    
-
-   
-    # Convert to sf object and add polygons to the map
-    sf_data <- geojsonsf::geojson_sf(geojson_text)
-    
-   
-    
-    # Filter the sf_data based on selected countries
-    sf_data <- sf_data %>% filter(CNTY %in% selected_countries)
+      if (nrow(sf_data) == 0) {
+        shinyjs::hide("loading")
+        showNotification("No polygons available for the selected countries.", type = "warning")
+        return()
+      }
     
     
     # Merge sf_data (polygon data) with merged_data (density and vaccine requirement) on ADMIN1_Name
@@ -1256,8 +1237,8 @@ server <- function(input, output, session) {
     
     }, error = function(e) {
       shinyjs::hide("loading")
-      showNotification("The UN Geoservice map is currently unavailable. Please try again in a few minutes.", type = "error")
-      message("Error fetching polygon data: ", e$message)
+      showNotification("Error fetching administrative boundaries from GADM. Please try again in a few minutes.", type = "error")
+      message("Error fetching polygon data from GADM: ", e$message)
       return(NULL)  # Ensure the rest of the code does not execute
     })
       
