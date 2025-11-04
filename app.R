@@ -290,6 +290,9 @@ server <- function(input, output, session) {
     on.exit(dbDisconnect(con), add = TRUE)
   })
   
+  # Reactive value to store country data with ISO3CD
+  filtered_countries_data <- reactiveVal(NULL)
+  
   # Filter countries according to selected subregion
   observe({
     req(input$Subregion)  # Ensure Subregion input is available
@@ -302,12 +305,15 @@ server <- function(input, output, session) {
     # Ensure the connection is closed after the query
     on.exit(dbDisconnect(con), add = TRUE)
     
-    # Query to fetch distinct countries based on selected subregions
-    query_countries <- paste("SELECT DISTINCT name_un FROM VADEMOS.countries WHERE subregion IN ('", 
+    # Query to fetch distinct countries with ISO3CD based on selected subregions
+    query_countries <- paste("SELECT DISTINCT name_un, ISO3CD FROM VADEMOS.countries WHERE subregion IN ('", 
                              paste(input$Subregion, collapse = "','"), "')", sep = "")
     
     # Fetch filtered countries from the database
     filtered_countries <- dbGetQuery(con, query_countries)
+    
+    # Store the data in reactive value
+    filtered_countries_data(filtered_countries)
     
     # Update the Country picker input with the fetched data
     updatePickerInput(session, "Country", choices = filtered_countries$name_un)
@@ -1052,18 +1058,59 @@ server <- function(input, output, session) {
     # Ensure the connection is closed after the query
     on.exit(dbDisconnect(con), add = TRUE)
     
-    # Query density data
+    # Get ISO3 codes for selected countries from stored data
+    country_data <- filtered_countries_data()
+    selected_country_data <- country_data[country_data$name_un %in% results$Country, ]
+    iso_codes <- selected_country_data$ISO3CD
+    
+    # Query density data using GID_0 (ISO3 codes)
     density_query <- sprintf(
-      "SELECT * FROM VADEMOS.density WHERE NAME_0 IN (%s) AND Specie IN (%s)",
-      paste(shQuote(results$Country), collapse = ", "),
-      paste(shQuote(unique(results$Specie)), collapse = ", ")
+      "SELECT * FROM VADEMOS.density_2025 WHERE GID_0 IN (%s)",
+      paste(shQuote(iso_codes), collapse = ", ")
     )
     density_data <- dbGetQuery(con, density_query)
     print(density_data)
     
-    # Merge results with density data
-    merged <- merge(results, density_data, by.x = c("Country", "Specie"), by.y = c("NAME_0", "Specie"))
-    merged <- merged %>% 
+    # Merge results with density data using ISO3 mapping
+    # Use the stored country data instead of querying again
+    results_with_iso <- merge(results, selected_country_data, by.x = "Country", by.y = "name_un")
+    merged <- merge(results_with_iso, density_data, by.x = "ISO3CD", by.y = "GID_0")
+    
+    # Create expanded data for each species with proper density mapping
+    expanded_data <- data.frame()
+    
+    for (i in seq_len(nrow(merged))) {
+      row_data <- merged[i, ]
+      specie <- row_data$Specie
+      
+      # Map species to density column names
+      density_col <- case_when(
+        specie == "Cattle" ~ row_data$cattle_density,
+        specie == "Buffalo" ~ row_data$buffalo_density,
+        specie == "Goats" ~ row_data$goats_density,
+        specie == "Sheep" ~ row_data$sheep_density,
+        specie == "Swine / pigs" ~ row_data$pigs_density,
+        TRUE ~ 0
+      )
+      
+      head_km2_col <- case_when(
+        specie == "Cattle" ~ row_data$cattle_km2,
+        specie == "Buffalo" ~ row_data$buffalo_km2,
+        specie == "Goats" ~ row_data$goats_km2,
+        specie == "Sheep" ~ row_data$sheep_km2,
+        specie == "Swine / pigs" ~ row_data$pigs_km2,
+        TRUE ~ 0
+      )
+      
+      # Add the mapped values to the row
+      row_data$Density <- density_col
+      row_data$head_km2 <- head_km2_col
+      
+      expanded_data <- rbind(expanded_data, row_data)
+    }
+    
+    # Calculate vaccine requirements using the expanded data
+    expanded_data <- expanded_data %>% 
               mutate(
               Prophylactic_Vaccination = as.numeric(gsub(",", "", `Prophylactic Vaccination (doses)`)),
               Prophylactic_Vaccination = round((Density / 100) * Prophylactic_Vaccination, 0),
@@ -1072,15 +1119,15 @@ server <- function(input, output, session) {
               Emergency_Adult = round(Area_km2 * head_km2 * `Adult Proportion (%)` / 100 * `Adult Schedule` * `Emergency Coverage (%)` / 100, 0),
               Emergency_Vaccination = Emergency_Youngstock + Emergency_Adult)
 
-    # Collapse by ADM1_Name, Country, Specie
-    merged_summary <- merged %>%
-      group_by(Country, Specie, ADM1_Name, Density, head_km2) %>%
+    # Collapse by GID_1, Country, Specie (using the administrative ID and species from results)
+    merged_summary <- expanded_data %>%
+      group_by(Country, Specie, GID_1, NAME_1, Density, head_km2) %>%
       summarise(
         Prophylactic_Vaccination = paste(paste(Year, ':', format(Prophylactic_Vaccination, big.mark = ",", scientific = FALSE, trim = TRUE)), collapse = '<br>'),
         Emergency_Vaccination = format(sum(Emergency_Vaccination, na.rm = TRUE), big.mark = ",", scientific = FALSE, trim = TRUE),
         .groups = 'drop'
       )
-    selected_countries <- unique(merged$CNTY)
+    selected_countries <- unique(expanded_data$ISO3CD)
     
   
     
@@ -1094,10 +1141,9 @@ server <- function(input, output, session) {
       })
       # Combine into one sf object
       sf_data <- do.call(rbind, sf_data_list)
-      # Rename columns to match expected fields
-      sf_data <- sf_data %>% rename(CNTY = GID_0, ADM1_Name = NAME_1)
-      # Filter the sf_data based on selected countries
-      sf_data <- sf_data %>% filter(CNTY %in% selected_countries)
+      # Keep original GADM column names (GID_0, NAME_1, GID_1)
+      # Filter the sf_data based on selected countries (using ISO3 codes)
+      sf_data <- sf_data %>% filter(GID_0 %in% selected_countries)
 
       if (nrow(sf_data) == 0) {
         shinyjs::hide("loading")
@@ -1106,8 +1152,8 @@ server <- function(input, output, session) {
       }
     
     
-    # Merge sf_data (polygon data) with merged_data (density and vaccine requirement) on ADMIN1_Name
-    merged_sf_data <- merge(sf_data, merged, by = "ADM1_Name", all.x = TRUE)
+    # Merge sf_data (polygon data) with expanded_data (density and vaccine requirement) on GID_1
+    merged_sf_data <- merge(sf_data, expanded_data, by = "GID_1", all.x = TRUE)
     
     # Print the merged data for debugging purposes
     
@@ -1120,8 +1166,9 @@ server <- function(input, output, session) {
       # Render the leaflet map with density-based coloring
       output$worldmap <- renderLeaflet({
         
-        # Create color palette based on Density values
-        palette <- colorNumeric("Greens", domain = merged_sf_data$Density)
+        # Create color palette with more granular breaks for lower density ranges
+        breaks <- c(0, 2, 5, 10, 15, 20, 30, 50, 75, 100)
+        palette <- colorBin("Greens", domain = merged_sf_data$Density, bins = breaks)
         
         # Render leaflet map
         leaflet() %>%
@@ -1137,7 +1184,7 @@ server <- function(input, output, session) {
                       fillColor = ~palette(Density),  # Use palette function to color based on Density
                       fillOpacity = 0.7,
                       highlightOptions = highlightOptions(weight = 2, color = "white", fillOpacity = 0.7),
-                      layerId = ~ADM1_Name
+                      layerId = ~GID_1
 
           ) %>%
             
@@ -1163,8 +1210,8 @@ server <- function(input, output, session) {
         # Update the reactive value with the new selection
         selected_area(area_id)
         
-        # Filter data based on the selected area
-        filtered_data <- merged_summary %>% filter(ADM1_Name == selected_area())
+        # Filter data based on the selected area using GID_1 directly
+        filtered_data <- merged_summary %>% filter(GID_1 == selected_area())
         print(filtered_data)
         
         
@@ -1174,7 +1221,8 @@ server <- function(input, output, session) {
             tags$table(
               tags$tr(tags$th("Country"), tags$td(filtered_data$Country[i])),
               tags$tr(tags$th("Specie"), tags$td(filtered_data$Specie[i])),
-              tags$tr(tags$th("ADM1_Name"), tags$td(filtered_data$ADM1_Name[i])),
+              tags$tr(tags$th("Administrative Area"), tags$td(filtered_data$NAME_1[i])),
+              tags$tr(tags$th("GID_1"), tags$td(filtered_data$GID_1[i])),
               tags$tr(tags$th("Density"), tags$td(filtered_data$Density[i])),
               tags$tr(tags$th("Head_km2"), tags$td(filtered_data$head_km2[i])),
               tags$tr(tags$th("Prophylactic Vaccination (doses)"), tags$td(HTML(filtered_data$Prophylactic_Vaccination[i]))),
@@ -1201,13 +1249,13 @@ server <- function(input, output, session) {
       
       # Observe full table button and map display
       observeEvent(input$fulltablebutton, {
-        # Reshape merged to wide format for years, using consistent column names
+        # Reshape expanded_data to wide format for years, using consistent column names
         library(tidyr)
         library(dplyr)
-        table_data <- merged %>%
-          dplyr::select(Country, Specie, ADM1_Name, Year, Prophylactic_Vaccination, Emergency_Vaccination) %>%
+        table_data <- expanded_data %>%
+          dplyr::select(Country, Specie, GID_1, NAME_1, Year, Prophylactic_Vaccination, Emergency_Vaccination) %>%
           tidyr::pivot_wider(
-            id_cols = c(Country, Specie, ADM1_Name),
+            id_cols = c(Country, Specie, GID_1, NAME_1),
             names_from = Year,
             values_from = c(Prophylactic_Vaccination, Emergency_Vaccination),
             names_glue = "{.value} ({Year})"
