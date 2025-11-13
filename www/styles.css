@@ -145,3 +145,58 @@ body {
 
 /* Font color change for div id "help_region_selection" */
 .help_texts {color: #ff0000; font-style: italic;}
+
+
+/* Progress bar styling - match app green theme */
+.shiny-progress-container {
+    border-color: #073f23 !important;
+}
+
+.shiny-progress .progress {
+    border-color: #073f23 !important;
+    background-color: #e6e6e6 !important;
+}
+
+.shiny-progress .progress .progress-bar {
+    background-color: #073f23 !important;
+}
+
+.shiny-progress .progress-bar {
+    background-color: #073f23 !important;
+}
+
+/* Override Bootstrap default blue */
+.progress-bar {
+    background-color: #073f23 !important;
+}
+
+.progress-bar-info {
+    background-color: #073f23 !important;
+}
+
+/* Notification styling - green and centered */
+.shiny-notification {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    background-color: #073f23 !important;
+    color: white !important;
+    border: 2px solid #073f23 !important;
+    border-radius: 5px !important;
+    font-size: 16px !important;
+    padding: 20px 30px !important;
+    min-width: 300px !important;
+    text-align: center !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+    z-index: 9999 !important;
+}
+
+.shiny-notification-message {
+    color: white !important;
+    font-weight: bold !important;
+}
+
+.shiny-notification-close {
+    color: white !important;
+}

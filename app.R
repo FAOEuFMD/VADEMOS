@@ -174,6 +174,108 @@ server <- function(input, output, session) {
   library(DBI)
   library(RMySQL)  # Use RPostgres if AWS uses PostgreSQL
   
+  # Create persistent cache directory for GADM data
+  cache_dir <- file.path(getwd(), "gadm_cache")
+  if (!dir.exists(cache_dir)) {
+    dir.create(cache_dir, recursive = TRUE)
+    message("Created GADM cache directory: ", cache_dir)
+  }
+  
+  # Function to manage cache size (keep it under 50MB)
+  manage_cache_size <- function(max_size_mb = 50) {
+    cache_files <- list.files(cache_dir, pattern = "\\.rds$", full.names = TRUE)
+    if (length(cache_files) == 0) return()
+    
+    # Get file info
+    file_info <- file.info(cache_files)
+    total_size_mb <- sum(file_info$size) / (1024^2)
+    
+    if (total_size_mb > max_size_mb) {
+      message(paste("Cache size:", round(total_size_mb, 2), "MB - cleaning old files..."))
+      
+      # Sort by last access time (oldest first)
+      file_info$path <- rownames(file_info)
+      file_info <- file_info[order(file_info$atime), ]
+      
+      # Remove oldest files until under limit
+      for (i in seq_len(nrow(file_info))) {
+        if (total_size_mb <= max_size_mb) break
+        
+        file_size_mb <- file_info$size[i] / (1024^2)
+        file.remove(file_info$path[i])
+        total_size_mb <- total_size_mb - file_size_mb
+        message(paste("  - Removed old cache file:", basename(file_info$path[i])))
+      }
+      
+      message(paste("Cache cleaned. New size:", round(total_size_mb, 2), "MB"))
+    }
+  }
+  
+  # Check and manage cache size on startup
+  tryCatch({
+    manage_cache_size(max_size_mb = 50)
+  }, error = function(e) {
+    message("Cache management error: ", e$message)
+  })
+  
+  # GADM cache to store downloaded administrative boundaries in memory
+  gadm_cache <- reactiveValues(data = list())
+  
+  # Function to load GADM data from disk cache or download if needed
+  get_gadm_data <- function(country_code) {
+    cache_file <- file.path(cache_dir, paste0(country_code, "_adm1.rds"))
+    
+    # Check if file exists in disk cache
+    if (file.exists(cache_file)) {
+      message(paste("  - Loading from disk cache:", country_code))
+      showNotification(
+        paste("Loading", country_code, "from cache..."),
+        type = "default",
+        duration = 3,
+        closeButton = FALSE,
+        id = paste0("loading_", country_code)
+      )
+      tryCatch({
+        sf_data <- readRDS(cache_file)
+        return(sf_data)
+      }, error = function(e) {
+        message(paste("  - Error reading cache file, re-downloading:", country_code))
+        file.remove(cache_file)  # Remove corrupted file
+      })
+    }
+    
+    # If not in cache, download from GADM
+    message(paste("  - Downloading from GADM:", country_code))
+    showNotification(
+      paste("Downloading administrative boundaries for", country_code, "..."),
+      type = "default",
+      duration = NULL,  # Stay until dismissed
+      closeButton = FALSE,
+      id = paste0("download_", country_code)
+    )
+    
+    gadm_data <- geodata::gadm(country = country_code, level = 1, path = tempdir())
+    sf_data <- sf::st_as_sf(gadm_data)
+    
+    # Save to disk cache for future use
+    tryCatch({
+      saveRDS(sf_data, cache_file)
+      message(paste("  - Saved to disk cache:", country_code))
+      removeNotification(id = paste0("download_", country_code))
+      showNotification(
+        paste("Successfully loaded", country_code),
+        type = "default",
+        duration = 2,
+        closeButton = FALSE
+      )
+    }, error = function(e) {
+      message(paste("  - Warning: Could not save to cache:", e$message))
+      removeNotification(id = paste0("download_", country_code))
+    })
+    
+    return(sf_data)
+  }
+  
   store_logs_in_db <- function(logs) {
     # Extract only session-related information
     session_logs <- logs$session
@@ -1040,41 +1142,39 @@ server <- function(input, output, session) {
   #########################
   
   observeEvent(input$mapbutton, {
-    # Show the spinner
-    shinyjs::show("loading")
-    req(input$radius)  # Ensure the radius input is available
-    radius_selected <- input$radius
-    # Call the get_results function
-    results <- shared_results()
-    req(results)
-   
     
-    con <- dbConnect(RMySQL::MySQL(),
-                     dbname = Sys.getenv("DB_NAME1"), # or DB_NAME2 if you want the other DB
-                     host = Sys.getenv("DB_HOST"),
-                     port = as.numeric(Sys.getenv("DB_PORT")),
-                     user = Sys.getenv("DB_USER"),
-                     password = Sys.getenv("DB_PASSWORD"))
-    # Ensure the connection is closed after the query
-    on.exit(dbDisconnect(con), add = TRUE)
-    
-    # Get ISO3 codes for selected countries from stored data
-    country_data <- filtered_countries_data()
-    selected_country_data <- country_data[country_data$name_un %in% results$Country, ]
-    iso_codes <- selected_country_data$ISO3CD
-    
-    # Query density data using GID_0 (ISO3 codes)
-    density_query <- sprintf(
-      "SELECT * FROM VADEMOS.density_2025 WHERE GID_0 IN (%s)",
-      paste(shQuote(iso_codes), collapse = ", ")
-    )
-    density_data <- dbGetQuery(con, density_query)
-    print(density_data)
-    
-    # Merge results with density data using ISO3 mapping
-    # Use the stored country data instead of querying again
-    results_with_iso <- merge(results, selected_country_data, by.x = "Country", by.y = "name_un")
-    merged <- merge(results_with_iso, density_data, by.x = "ISO3CD", by.y = "GID_0")
+      req(input$radius)  # Ensure the radius input is available
+      radius_selected <- input$radius
+      # Call the get_results function
+      results <- shared_results()
+      req(results)
+      
+      con <- dbConnect(RMySQL::MySQL(),
+                       dbname = Sys.getenv("DB_NAME1"), # or DB_NAME2 if you want the other DB
+                       host = Sys.getenv("DB_HOST"),
+                       port = as.numeric(Sys.getenv("DB_PORT")),
+                       user = Sys.getenv("DB_USER"),
+                       password = Sys.getenv("DB_PASSWORD"))
+      # Ensure the connection is closed after the query
+      on.exit(dbDisconnect(con), add = TRUE)
+      
+      # Get ISO3 codes for selected countries from stored data
+      country_data <- filtered_countries_data()
+      selected_country_data <- country_data[country_data$name_un %in% results$Country, ]
+      iso_codes <- selected_country_data$ISO3CD
+      
+      # Query density data using GID_0 (ISO3 codes)
+      density_query <- sprintf(
+        "SELECT * FROM VADEMOS.density_2025 WHERE GID_0 IN (%s)",
+        paste(shQuote(iso_codes), collapse = ", ")
+      )
+      density_data <- dbGetQuery(con, density_query)
+      print(density_data)
+      
+      # Merge results with density data using ISO3 mapping
+      # Use the stored country data instead of querying again
+      results_with_iso <- merge(results, selected_country_data, by.x = "Country", by.y = "name_un")
+      merged <- merge(results_with_iso, density_data, by.x = "ISO3CD", by.y = "GID_0")
     
     # Create expanded data for each species with proper density mapping
     expanded_data <- data.frame()
@@ -1129,39 +1229,54 @@ server <- function(input, output, session) {
       )
     selected_countries <- unique(expanded_data$ISO3CD)
     
-  
-    
-    ##########################code to fetch from GADM#########################################
+    ##########################code to fetch from GADM with PERSISTENT CACHING#########################################
     # Fetch administrative boundaries from GADM
     tryCatch({
-      # Download GADM data for each selected country at level 1 (admin1)
-      sf_data_list <- lapply(selected_countries, function(country) {
-        gadm_data <- geodata::gadm(country = country, level = 1, path = tempdir())
-        sf::st_as_sf(gadm_data)
-      })
+      # Check which countries are missing from memory cache
+      missing_countries <- setdiff(selected_countries, names(gadm_cache$data))
+      
+      # Load missing countries (from disk cache or download)
+      if (length(missing_countries) > 0) {
+        message(paste("Loading GADM data for", length(missing_countries), "countries:", paste(missing_countries, collapse = ", ")))
+        
+        # Load each missing country (will use disk cache if available, otherwise download)
+        new_sf_data_list <- lapply(missing_countries, function(country) {
+          get_gadm_data(country)
+        })
+        
+        # Add to memory cache
+        for (i in seq_along(missing_countries)) {
+          gadm_cache$data[[missing_countries[i]]] <- new_sf_data_list[[i]]
+          message(paste("  - Added to memory cache:", missing_countries[i]))
+        }
+      } else {
+        message("All countries already in memory cache.")
+      }
+      
+      # Get data from memory cache for selected countries
+      sf_data_list <- gadm_cache$data[selected_countries]
       # Combine into one sf object
       sf_data <- do.call(rbind, sf_data_list)
+      
+      # Simplify polygon geometry to speed up rendering
+      message("Simplifying polygon geometry for faster rendering...")
+      sf_data <- sf_data %>%
+        sf::st_simplify(preserveTopology = TRUE, dTolerance = 0.01)
+      message("Geometry simplified successfully")
       # Keep original GADM column names (GID_0, NAME_1, GID_1)
       # Filter the sf_data based on selected countries (using ISO3 codes)
       sf_data <- sf_data %>% filter(GID_0 %in% selected_countries)
 
       if (nrow(sf_data) == 0) {
-        shinyjs::hide("loading")
         showNotification("No polygons available for the selected countries.", type = "warning")
         return()
       }
-    
-    
-    # Merge sf_data (polygon data) with expanded_data (density and vaccine requirement) on GID_1
-    merged_sf_data <- merge(sf_data, expanded_data, by = "GID_1", all.x = TRUE)
-    
-    # Print the merged data for debugging purposes
-    
+      
+      # Merge sf_data (polygon data) with expanded_data (density and vaccine requirement) on GID_1
+      merged_sf_data <- merge(sf_data, expanded_data, by = "GID_1", all.x = TRUE)
+      
+      # Print the merged data for debugging purposes
       print(merged_sf_data)
-      
-    
-    
-      
       
       # Render the leaflet map with density-based coloring
       output$worldmap <- renderLeaflet({
@@ -1184,7 +1299,10 @@ server <- function(input, output, session) {
                       fillColor = ~palette(Density),  # Use palette function to color based on Density
                       fillOpacity = 0.7,
                       highlightOptions = highlightOptions(weight = 2, color = "white", fillOpacity = 0.7),
-                      layerId = ~GID_1
+                      layerId = ~GID_1,
+                      # Performance optimization options
+                      options = pathOptions(pane = "overlayPane"),
+                      smoothFactor = 2  # Simplify polygons during rendering
 
           ) %>%
             
@@ -1193,9 +1311,6 @@ server <- function(input, output, session) {
           # Add a legend to represent density-based coloring
           addLegend(pal = palette, values = merged_sf_data$Density, opacity = 0.7, title = "Density", position = "bottomright")
       }) #map output
-      
-      # Hide the loading spinner after calculations are done
-      shinyjs::hide("loading")
       
       # Reactive value to store the selected area
       selected_area <- reactiveVal(NULL)
@@ -1284,13 +1399,12 @@ server <- function(input, output, session) {
       })
     
     }, error = function(e) {
-      shinyjs::hide("loading")
       showNotification("Error fetching administrative boundaries from GADM. Please try again in a few minutes.", type = "error")
       message("Error fetching polygon data from GADM: ", e$message)
       return(NULL)  # Ensure the rest of the code does not execute
     })
       
-    })#observe event
+  })#observe event
 
       
   # Close the connection when the Shiny session ends
