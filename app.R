@@ -13,6 +13,8 @@ library(data.table) #reads csv and table functions
 library(DBI)
 library(dplyr)
 library(DT)
+library(future)
+library(future.apply)
 library(geodata)
 library(geojsonio)
 library(glue)
@@ -174,6 +176,14 @@ server <- function(input, output, session) {
   library(DBI)
   library(RMySQL)  # Use RPostgres if AWS uses PostgreSQL
   
+  # Set up async processing with future
+  # Use only 1 worker on shinyapps.io free tier to avoid memory issues
+  if (Sys.getenv("R_CONFIG_ACTIVE") == "shinyapps") {
+    plan(sequential)  # No parallel processing on server (saves memory)
+  } else {
+    plan(multisession, workers = 2)  # 2 workers locally (reduced from 3)
+  }
+  
   # Create persistent cache directory for GADM data
   cache_dir <- file.path(getwd(), "gadm_cache")
   if (!dir.exists(cache_dir)) {
@@ -181,8 +191,13 @@ server <- function(input, output, session) {
     message("Created GADM cache directory: ", cache_dir)
   }
   
-  # Function to manage cache size (keep it under 50MB)
+  # Function to manage cache size (keep it under 50MB locally, 30MB on server)
   manage_cache_size <- function(max_size_mb = 50) {
+    # Use smaller cache on shinyapps.io
+    if (Sys.getenv("R_CONFIG_ACTIVE") == "shinyapps") {
+      max_size_mb <- 30
+    }
+    
     cache_files <- list.files(cache_dir, pattern = "\\.rds$", full.names = TRUE)
     if (length(cache_files) == 0) return()
     
@@ -207,6 +222,8 @@ server <- function(input, output, session) {
         message(paste("  - Removed old cache file:", basename(file_info$path[i])))
       }
       
+      # Force garbage collection to free memory
+      gc()
       message(paste("Cache cleaned. New size:", round(total_size_mb, 2), "MB"))
     }
   }
@@ -218,23 +235,24 @@ server <- function(input, output, session) {
     message("Cache management error: ", e$message)
   })
   
-  # GADM cache to store downloaded administrative boundaries in memory
-  gadm_cache <- reactiveValues(data = list())
+  # NO memory cache - use disk only to save RAM on free tier
   
   # Function to load GADM data from disk cache or download if needed
-  get_gadm_data <- function(country_code) {
+  get_gadm_data <- function(country_code, silent = FALSE) {
     cache_file <- file.path(cache_dir, paste0(country_code, "_adm1.rds"))
     
     # Check if file exists in disk cache
     if (file.exists(cache_file)) {
       message(paste("  - Loading from disk cache:", country_code))
-      showNotification(
-        paste("Loading", country_code, "from cache..."),
-        type = "default",
-        duration = 3,
-        closeButton = FALSE,
-        id = paste0("loading_", country_code)
-      )
+      if (!silent) {
+        showNotification(
+          paste("Loading", country_code, "from cache..."),
+          type = "default",
+          duration = 3,
+          closeButton = FALSE,
+          id = paste0("loading_", country_code)
+        )
+      }
       tryCatch({
         sf_data <- readRDS(cache_file)
         return(sf_data)
@@ -246,13 +264,15 @@ server <- function(input, output, session) {
     
     # If not in cache, download from GADM
     message(paste("  - Downloading from GADM:", country_code))
-    showNotification(
-      paste("Downloading administrative boundaries for", country_code, "..."),
-      type = "default",
-      duration = NULL,  # Stay until dismissed
-      closeButton = FALSE,
-      id = paste0("download_", country_code)
-    )
+    if (!silent) {
+      showNotification(
+        paste("Downloading administrative boundaries for", country_code, "..."),
+        type = "default",
+        duration = NULL,  # Stay until dismissed
+        closeButton = FALSE,
+        id = paste0("download_", country_code)
+      )
+    }
     
     gadm_data <- geodata::gadm(country = country_code, level = 1, path = tempdir())
     sf_data <- sf::st_as_sf(gadm_data)
@@ -261,16 +281,20 @@ server <- function(input, output, session) {
     tryCatch({
       saveRDS(sf_data, cache_file)
       message(paste("  - Saved to disk cache:", country_code))
-      removeNotification(id = paste0("download_", country_code))
-      showNotification(
-        paste("Successfully loaded", country_code),
-        type = "default",
-        duration = 2,
-        closeButton = FALSE
-      )
+      if (!silent) {
+        removeNotification(id = paste0("download_", country_code))
+        showNotification(
+          paste("Successfully loaded", country_code),
+          type = "default",
+          duration = 2,
+          closeButton = FALSE
+        )
+      }
     }, error = function(e) {
       message(paste("  - Warning: Could not save to cache:", e$message))
-      removeNotification(id = paste0("download_", country_code))
+      if (!silent) {
+        removeNotification(id = paste0("download_", country_code))
+      }
     })
     
     return(sf_data)
@@ -1229,34 +1253,62 @@ server <- function(input, output, session) {
       )
     selected_countries <- unique(expanded_data$ISO3CD)
     
-    ##########################code to fetch from GADM with PERSISTENT CACHING#########################################
-    # Fetch administrative boundaries from GADM
+    ##########################code to fetch from GADM with DISK CACHE ONLY (LOW MEMORY)#########################################
+    # Fetch administrative boundaries from GADM - read directly from disk to save memory
     tryCatch({
-      # Check which countries are missing from memory cache
-      missing_countries <- setdiff(selected_countries, names(gadm_cache$data))
+      # Check which countries are missing from disk cache
+      missing_countries <- selected_countries[!sapply(selected_countries, function(code) {
+        file.exists(file.path(cache_dir, paste0(code, "_adm1.rds")))
+      })]
       
-      # Load missing countries (from disk cache or download)
+      # Download missing countries if needed
       if (length(missing_countries) > 0) {
-        message(paste("Loading GADM data for", length(missing_countries), "countries:", paste(missing_countries, collapse = ", ")))
+        message(paste("Downloading GADM data for", length(missing_countries), "countries:", paste(missing_countries, collapse = ", ")))
         
-        # Load each missing country (will use disk cache if available, otherwise download)
-        new_sf_data_list <- lapply(missing_countries, function(country) {
-          get_gadm_data(country)
+        # Show a single notification for all downloads
+        showNotification(
+          paste("Downloading administrative boundaries for", length(missing_countries), "countries..."),
+          type = "default",
+          duration = NULL,
+          closeButton = FALSE,
+          id = "bulk_download"
+        )
+        
+        # Download missing countries (will be saved to disk)
+        lapply(missing_countries, function(country) {
+          get_gadm_data(country, silent = TRUE)
         })
         
-        # Add to memory cache
-        for (i in seq_along(missing_countries)) {
-          gadm_cache$data[[missing_countries[i]]] <- new_sf_data_list[[i]]
-          message(paste("  - Added to memory cache:", missing_countries[i]))
-        }
+        # Remove the bulk download notification
+        removeNotification(id = "bulk_download")
+        
+        # Show success notification
+        showNotification(
+          paste("Successfully loaded", length(missing_countries), "countries"),
+          type = "default",
+          duration = 3,
+          closeButton = FALSE
+        )
+        
+        # Force garbage collection after downloads
+        gc()
       } else {
-        message("All countries already in memory cache.")
+        message("All countries already in disk cache.")
       }
       
-      # Get data from memory cache for selected countries
-      sf_data_list <- gadm_cache$data[selected_countries]
+      # Read shapefiles directly from disk (no memory cache)
+      message("Reading shapefiles from disk cache...")
+      sf_data_list <- lapply(selected_countries, function(country) {
+        cache_file <- file.path(cache_dir, paste0(country, "_adm1.rds"))
+        readRDS(cache_file)
+      })
+      
       # Combine into one sf object
       sf_data <- do.call(rbind, sf_data_list)
+      
+      # Free the list immediately
+      rm(sf_data_list)
+      gc()
       
       # Simplify polygon geometry to speed up rendering
       message("Simplifying polygon geometry for faster rendering...")
