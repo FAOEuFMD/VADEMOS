@@ -276,6 +276,12 @@ tool <- function() {
                        ))
                      ),
                      
+                     
+                       column(12, div(id = "loading",  # Spinner div
+                                      style = "display: none; text-align: center;",
+                                      icon("spinner", class = "fa-spin fa-3x"))  # Loading spinner
+                       ),
+                       
                  
                      column(7, 
                             leafletOutput("worldmap"),

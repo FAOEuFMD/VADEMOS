@@ -13,9 +13,6 @@ library(data.table) #reads csv and table functions
 library(DBI)
 library(dplyr)
 library(DT)
-library(future)
-library(future.apply)
-library(geodata)
 library(geojsonio)
 library(glue)
 library(httr)
@@ -176,130 +173,6 @@ server <- function(input, output, session) {
   library(DBI)
   library(RMySQL)  # Use RPostgres if AWS uses PostgreSQL
   
-  # Set up async processing with future
-  # Use only 1 worker on shinyapps.io free tier to avoid memory issues
-  if (Sys.getenv("R_CONFIG_ACTIVE") == "shinyapps") {
-    plan(sequential)  # No parallel processing on server (saves memory)
-  } else {
-    plan(multisession, workers = 2)  # 2 workers locally (reduced from 3)
-  }
-  
-  # Create persistent cache directory for GADM data
-  cache_dir <- file.path(getwd(), "gadm_cache")
-  if (!dir.exists(cache_dir)) {
-    dir.create(cache_dir, recursive = TRUE)
-    message("Created GADM cache directory: ", cache_dir)
-  }
-  
-  # Function to manage cache size (keep it under 50MB locally, 30MB on server)
-  manage_cache_size <- function(max_size_mb = 50) {
-    # Use smaller cache on shinyapps.io
-    if (Sys.getenv("R_CONFIG_ACTIVE") == "shinyapps") {
-      max_size_mb <- 30
-    }
-    
-    cache_files <- list.files(cache_dir, pattern = "\\.rds$", full.names = TRUE)
-    if (length(cache_files) == 0) return()
-    
-    # Get file info
-    file_info <- file.info(cache_files)
-    total_size_mb <- sum(file_info$size) / (1024^2)
-    
-    if (total_size_mb > max_size_mb) {
-      message(paste("Cache size:", round(total_size_mb, 2), "MB - cleaning old files..."))
-      
-      # Sort by last access time (oldest first)
-      file_info$path <- rownames(file_info)
-      file_info <- file_info[order(file_info$atime), ]
-      
-      # Remove oldest files until under limit
-      for (i in seq_len(nrow(file_info))) {
-        if (total_size_mb <= max_size_mb) break
-        
-        file_size_mb <- file_info$size[i] / (1024^2)
-        file.remove(file_info$path[i])
-        total_size_mb <- total_size_mb - file_size_mb
-        message(paste("  - Removed old cache file:", basename(file_info$path[i])))
-      }
-      
-      # Force garbage collection to free memory
-      gc()
-      message(paste("Cache cleaned. New size:", round(total_size_mb, 2), "MB"))
-    }
-  }
-  
-  # Check and manage cache size on startup
-  tryCatch({
-    manage_cache_size(max_size_mb = 50)
-  }, error = function(e) {
-    message("Cache management error: ", e$message)
-  })
-  
-  # NO memory cache - use disk only to save RAM on free tier
-  
-  # Function to load GADM data from disk cache or download if needed
-  get_gadm_data <- function(country_code, silent = FALSE) {
-    cache_file <- file.path(cache_dir, paste0(country_code, "_adm1.rds"))
-    
-    # Check if file exists in disk cache
-    if (file.exists(cache_file)) {
-      message(paste("  - Loading from disk cache:", country_code))
-      if (!silent) {
-        showNotification(
-          paste("Loading", country_code, "from cache..."),
-          type = "default",
-          duration = 3,
-          closeButton = FALSE,
-          id = paste0("loading_", country_code)
-        )
-      }
-      tryCatch({
-        sf_data <- readRDS(cache_file)
-        return(sf_data)
-      }, error = function(e) {
-        message(paste("  - Error reading cache file, re-downloading:", country_code))
-        file.remove(cache_file)  # Remove corrupted file
-      })
-    }
-    
-    # If not in cache, download from GADM
-    message(paste("  - Downloading from GADM:", country_code))
-    if (!silent) {
-      showNotification(
-        paste("Downloading administrative boundaries for", country_code, "..."),
-        type = "default",
-        duration = NULL,  # Stay until dismissed
-        closeButton = FALSE,
-        id = paste0("download_", country_code)
-      )
-    }
-    
-    gadm_data <- geodata::gadm(country = country_code, level = 1, path = tempdir())
-    sf_data <- sf::st_as_sf(gadm_data)
-    
-    # Save to disk cache for future use
-    tryCatch({
-      saveRDS(sf_data, cache_file)
-      message(paste("  - Saved to disk cache:", country_code))
-      if (!silent) {
-        removeNotification(id = paste0("download_", country_code))
-        showNotification(
-          paste("Successfully loaded", country_code),
-          type = "default",
-          duration = 2,
-          closeButton = FALSE
-        )
-      }
-    }, error = function(e) {
-      message(paste("  - Warning: Could not save to cache:", e$message))
-      if (!silent) {
-        removeNotification(id = paste0("download_", country_code))
-      }
-    })
-    
-    return(sf_data)
-  }
-  
   store_logs_in_db <- function(logs) {
     # Extract only session-related information
     session_logs <- logs$session
@@ -416,9 +289,6 @@ server <- function(input, output, session) {
     on.exit(dbDisconnect(con), add = TRUE)
   })
   
-  # Reactive value to store country data with ISO3CD
-  filtered_countries_data <- reactiveVal(NULL)
-  
   # Filter countries according to selected subregion
   observe({
     req(input$Subregion)  # Ensure Subregion input is available
@@ -431,15 +301,12 @@ server <- function(input, output, session) {
     # Ensure the connection is closed after the query
     on.exit(dbDisconnect(con), add = TRUE)
     
-    # Query to fetch distinct countries with ISO3CD based on selected subregions
-    query_countries <- paste("SELECT DISTINCT name_un, ISO3CD FROM VADEMOS.countries WHERE subregion IN ('", 
+    # Query to fetch distinct countries based on selected subregions
+    query_countries <- paste("SELECT DISTINCT name_un FROM VADEMOS.countries WHERE subregion IN ('", 
                              paste(input$Subregion, collapse = "','"), "')", sep = "")
     
     # Fetch filtered countries from the database
     filtered_countries <- dbGetQuery(con, query_countries)
-    
-    # Store the data in reactive value
-    filtered_countries_data(filtered_countries)
     
     # Update the Country picker input with the fetched data
     updatePickerInput(session, "Country", choices = filtered_countries$name_un)
@@ -1166,75 +1033,36 @@ server <- function(input, output, session) {
   #########################
   
   observeEvent(input$mapbutton, {
+    # Show the spinner
+    shinyjs::show("loading")
+    req(input$radius)  # Ensure the radius input is available
+    radius_selected <- input$radius
+    # Call the get_results function
+    results <- shared_results()
+    req(results)
+   
     
-      req(input$radius)  # Ensure the radius input is available
-      radius_selected <- input$radius
-      # Call the get_results function
-      results <- shared_results()
-      req(results)
-      
-      con <- dbConnect(RMySQL::MySQL(),
-                       dbname = Sys.getenv("DB_NAME1"), # or DB_NAME2 if you want the other DB
-                       host = Sys.getenv("DB_HOST"),
-                       port = as.numeric(Sys.getenv("DB_PORT")),
-                       user = Sys.getenv("DB_USER"),
-                       password = Sys.getenv("DB_PASSWORD"))
-      # Ensure the connection is closed after the query
-      on.exit(dbDisconnect(con), add = TRUE)
-      
-      # Get ISO3 codes for selected countries from stored data
-      country_data <- filtered_countries_data()
-      selected_country_data <- country_data[country_data$name_un %in% results$Country, ]
-      iso_codes <- selected_country_data$ISO3CD
-      
-      # Query density data using GID_0 (ISO3 codes)
-      density_query <- sprintf(
-        "SELECT * FROM VADEMOS.density_2025 WHERE GID_0 IN (%s)",
-        paste(shQuote(iso_codes), collapse = ", ")
-      )
-      density_data <- dbGetQuery(con, density_query)
-      print(density_data)
-      
-      # Merge results with density data using ISO3 mapping
-      # Use the stored country data instead of querying again
-      results_with_iso <- merge(results, selected_country_data, by.x = "Country", by.y = "name_un")
-      merged <- merge(results_with_iso, density_data, by.x = "ISO3CD", by.y = "GID_0")
+    con <- dbConnect(RMySQL::MySQL(),
+                     dbname = Sys.getenv("DB_NAME1"), # or DB_NAME2 if you want the other DB
+                     host = Sys.getenv("DB_HOST"),
+                     port = as.numeric(Sys.getenv("DB_PORT")),
+                     user = Sys.getenv("DB_USER"),
+                     password = Sys.getenv("DB_PASSWORD"))
+    # Ensure the connection is closed after the query
+    on.exit(dbDisconnect(con), add = TRUE)
     
-    # Create expanded data for each species with proper density mapping
-    expanded_data <- data.frame()
+    # Query density data
+    density_query <- sprintf(
+      "SELECT * FROM VADEMOS.density WHERE NAME_0 IN (%s) AND Specie IN (%s)",
+      paste(shQuote(results$Country), collapse = ", "),
+      paste(shQuote(unique(results$Specie)), collapse = ", ")
+    )
+    density_data <- dbGetQuery(con, density_query)
+    print(density_data)
     
-    for (i in seq_len(nrow(merged))) {
-      row_data <- merged[i, ]
-      specie <- row_data$Specie
-      
-      # Map species to density column names
-      density_col <- case_when(
-        specie == "Cattle" ~ row_data$cattle_density,
-        specie == "Buffalo" ~ row_data$buffalo_density,
-        specie == "Goats" ~ row_data$goats_density,
-        specie == "Sheep" ~ row_data$sheep_density,
-        specie == "Swine / pigs" ~ row_data$pigs_density,
-        TRUE ~ 0
-      )
-      
-      head_km2_col <- case_when(
-        specie == "Cattle" ~ row_data$cattle_km2,
-        specie == "Buffalo" ~ row_data$buffalo_km2,
-        specie == "Goats" ~ row_data$goats_km2,
-        specie == "Sheep" ~ row_data$sheep_km2,
-        specie == "Swine / pigs" ~ row_data$pigs_km2,
-        TRUE ~ 0
-      )
-      
-      # Add the mapped values to the row
-      row_data$Density <- density_col
-      row_data$head_km2 <- head_km2_col
-      
-      expanded_data <- rbind(expanded_data, row_data)
-    }
-    
-    # Calculate vaccine requirements using the expanded data
-    expanded_data <- expanded_data %>% 
+    # Merge results with density data
+    merged <- merge(results, density_data, by.x = c("Country", "Specie"), by.y = c("NAME_0", "Specie"))
+    merged <- merged %>% 
               mutate(
               Prophylactic_Vaccination = as.numeric(gsub(",", "", `Prophylactic Vaccination (doses)`)),
               Prophylactic_Vaccination = round((Density / 100) * Prophylactic_Vaccination, 0),
@@ -1243,99 +1071,76 @@ server <- function(input, output, session) {
               Emergency_Adult = round(Area_km2 * head_km2 * `Adult Proportion (%)` / 100 * `Adult Schedule` * `Emergency Coverage (%)` / 100, 0),
               Emergency_Vaccination = Emergency_Youngstock + Emergency_Adult)
 
-    # Collapse by GID_1, Country, Specie (using the administrative ID and species from results)
-    merged_summary <- expanded_data %>%
-      group_by(Country, Specie, GID_1, NAME_1, Density, head_km2) %>%
+    # Collapse by ADM1_Name, Country, Specie
+    merged_summary <- merged %>%
+      group_by(Country, Specie, ADM1_Name, Density, head_km2) %>%
       summarise(
         Prophylactic_Vaccination = paste(paste(Year, ':', format(Prophylactic_Vaccination, big.mark = ",", scientific = FALSE, trim = TRUE)), collapse = '<br>'),
         Emergency_Vaccination = format(sum(Emergency_Vaccination, na.rm = TRUE), big.mark = ",", scientific = FALSE, trim = TRUE),
         .groups = 'drop'
       )
-    selected_countries <- unique(expanded_data$ISO3CD)
+    selected_countries <- unique(merged$CNTY)
     
-    ##########################code to fetch from GADM with DISK CACHE ONLY (LOW MEMORY)#########################################
-    # Fetch administrative boundaries from GADM - read directly from disk to save memory
-    tryCatch({
-      # Check which countries are missing from disk cache
-      missing_countries <- selected_countries[!sapply(selected_countries, function(code) {
-        file.exists(file.path(cache_dir, paste0(code, "_adm1.rds")))
-      })]
-      
-      # Download missing countries if needed
-      if (length(missing_countries) > 0) {
-        message(paste("Downloading GADM data for", length(missing_countries), "countries:", paste(missing_countries, collapse = ", ")))
-        
-        # Show a single notification for all downloads
-        showNotification(
-          paste("Downloading administrative boundaries for", length(missing_countries), "countries..."),
-          type = "default",
-          duration = NULL,
-          closeButton = FALSE,
-          id = "bulk_download"
-        )
-        
-        # Download missing countries (will be saved to disk)
-        lapply(missing_countries, function(country) {
-          get_gadm_data(country, silent = TRUE)
-        })
-        
-        # Remove the bulk download notification
-        removeNotification(id = "bulk_download")
-        
-        # Show success notification
-        showNotification(
-          paste("Successfully loaded", length(missing_countries), "countries"),
-          type = "default",
-          duration = 3,
-          closeButton = FALSE
-        )
-        
-        # Force garbage collection after downloads
-        gc()
-      } else {
-        message("All countries already in disk cache.")
-      }
-      
-      # Read shapefiles directly from disk (no memory cache)
-      message("Reading shapefiles from disk cache...")
-      sf_data_list <- lapply(selected_countries, function(country) {
-        cache_file <- file.path(cache_dir, paste0(country, "_adm1.rds"))
-        readRDS(cache_file)
-      })
-      
-      # Combine into one sf object
-      sf_data <- do.call(rbind, sf_data_list)
-      
-      # Free the list immediately
-      rm(sf_data_list)
-      gc()
-      
-      # Simplify polygon geometry to speed up rendering
-      message("Simplifying polygon geometry for faster rendering...")
-      sf_data <- sf_data %>%
-        sf::st_simplify(preserveTopology = TRUE, dTolerance = 0.01)
-      message("Geometry simplified successfully")
-      # Keep original GADM column names (GID_0, NAME_1, GID_1)
-      # Filter the sf_data based on selected countries (using ISO3 codes)
-      sf_data <- sf_data %>% filter(GID_0 %in% selected_countries)
+  
+    
+    ##########################code to fetch from API#########################################3
+    CNTY_filter <-CNTY_filter <- paste(sprintf("'%s'", selected_countries), collapse = ", ")
+    CNTY_filter <- gsub(" ", "", CNTY_filter)  # Remove any spaces
 
-      if (nrow(sf_data) == 0) {
-        showNotification("No polygons available for the selected countries.", type = "warning")
-        return()
-      }
-      
-      # Merge sf_data (polygon data) with expanded_data (density and vaccine requirement) on GID_1
-      merged_sf_data <- merge(sf_data, expanded_data, by = "GID_1", all.x = TRUE)
-      
-      # Print the merged data for debugging purposes
+    # Debug: Print the filter to ensure it's correct
+    print(paste("CNTY Filter:",CNTY_filter))
+
+    # Manually construct the polygon URL with the filter
+
+    polygon_url <- sprintf(
+      "https://geoservices.un.org/arcgis/rest/services/ClearMap_WebTopo/MapServer/110/query?where=CNTY%%20IN%%20(%s)&outFields=CNTY,ADM1_Name&returnGeometry=true&f=geojson",CNTY_filter)
+    #Debug: Print the constructed URL
+    print(paste("Constructed Polygon URL:", polygon_url))
+
+    #polygon_url <- "https://geoservices.un.org/arcgis/rest/services/ClearMap_WebTopo/MapServer/110/query?where     =CNTY='TCD'&outFields=CNTY,ADM1_Name&returnGeometry=true&f=geojson"
+
+    # Fetch polygon data with error handling
+    tryCatch({
+       response <- GET(polygon_url)
+       geojson_text <- content(response, as = "text", type = "application/geo+json")
+       # Validate and convert to sf object
+       geojson_data <- jsonlite::fromJSON(geojson_text, simplifyVector = FALSE)
+
+
+    if (is.null(geojson_data$features) || length(geojson_data$features) == 0) {
+      shinyjs::hide("loading")
+      showNotification("No polygons available for the selected countries.", type = "warning")
+      return()
+    }
+
+    
+
+   
+    # Convert to sf object and add polygons to the map
+    sf_data <- geojsonsf::geojson_sf(geojson_text)
+    
+   
+    
+    # Filter the sf_data based on selected countries
+    sf_data <- sf_data %>% filter(CNTY %in% selected_countries)
+    
+    
+    # Merge sf_data (polygon data) with merged_data (density and vaccine requirement) on ADMIN1_Name
+    merged_sf_data <- merge(sf_data, merged, by = "ADM1_Name", all.x = TRUE)
+    
+    # Print the merged data for debugging purposes
+    
       print(merged_sf_data)
+      
+    
+    
+      
       
       # Render the leaflet map with density-based coloring
       output$worldmap <- renderLeaflet({
         
-        # Create color palette with more granular breaks for lower density ranges
-        breaks <- c(0, 2, 5, 10, 15, 20, 30, 50, 75, 100)
-        palette <- colorBin("Greens", domain = merged_sf_data$Density, bins = breaks)
+        # Create color palette based on Density values
+        palette <- colorNumeric("Greens", domain = merged_sf_data$Density)
         
         # Render leaflet map
         leaflet() %>%
@@ -1351,10 +1156,7 @@ server <- function(input, output, session) {
                       fillColor = ~palette(Density),  # Use palette function to color based on Density
                       fillOpacity = 0.7,
                       highlightOptions = highlightOptions(weight = 2, color = "white", fillOpacity = 0.7),
-                      layerId = ~GID_1,
-                      # Performance optimization options
-                      options = pathOptions(pane = "overlayPane"),
-                      smoothFactor = 2  # Simplify polygons during rendering
+                      layerId = ~ADM1_Name
 
           ) %>%
             
@@ -1363,6 +1165,9 @@ server <- function(input, output, session) {
           # Add a legend to represent density-based coloring
           addLegend(pal = palette, values = merged_sf_data$Density, opacity = 0.7, title = "Density", position = "bottomright")
       }) #map output
+      
+      # Hide the loading spinner after calculations are done
+      shinyjs::hide("loading")
       
       # Reactive value to store the selected area
       selected_area <- reactiveVal(NULL)
@@ -1377,8 +1182,8 @@ server <- function(input, output, session) {
         # Update the reactive value with the new selection
         selected_area(area_id)
         
-        # Filter data based on the selected area using GID_1 directly
-        filtered_data <- merged_summary %>% filter(GID_1 == selected_area())
+        # Filter data based on the selected area
+        filtered_data <- merged_summary %>% filter(ADM1_Name == selected_area())
         print(filtered_data)
         
         
@@ -1388,8 +1193,7 @@ server <- function(input, output, session) {
             tags$table(
               tags$tr(tags$th("Country"), tags$td(filtered_data$Country[i])),
               tags$tr(tags$th("Specie"), tags$td(filtered_data$Specie[i])),
-              tags$tr(tags$th("Administrative Area"), tags$td(filtered_data$NAME_1[i])),
-              tags$tr(tags$th("GID_1"), tags$td(filtered_data$GID_1[i])),
+              tags$tr(tags$th("ADM1_Name"), tags$td(filtered_data$ADM1_Name[i])),
               tags$tr(tags$th("Density"), tags$td(filtered_data$Density[i])),
               tags$tr(tags$th("Head_km2"), tags$td(filtered_data$head_km2[i])),
               tags$tr(tags$th("Prophylactic Vaccination (doses)"), tags$td(HTML(filtered_data$Prophylactic_Vaccination[i]))),
@@ -1416,13 +1220,13 @@ server <- function(input, output, session) {
       
       # Observe full table button and map display
       observeEvent(input$fulltablebutton, {
-        # Reshape expanded_data to wide format for years, using consistent column names
+        # Reshape merged to wide format for years, using consistent column names
         library(tidyr)
         library(dplyr)
-        table_data <- expanded_data %>%
-          dplyr::select(Country, Specie, GID_1, NAME_1, Year, Prophylactic_Vaccination, Emergency_Vaccination) %>%
+        table_data <- merged %>%
+          dplyr::select(Country, Specie, ADM1_Name, Year, Prophylactic_Vaccination, Emergency_Vaccination) %>%
           tidyr::pivot_wider(
-            id_cols = c(Country, Specie, GID_1, NAME_1),
+            id_cols = c(Country, Specie, ADM1_Name),
             names_from = Year,
             values_from = c(Prophylactic_Vaccination, Emergency_Vaccination),
             names_glue = "{.value} ({Year})"
@@ -1451,12 +1255,13 @@ server <- function(input, output, session) {
       })
     
     }, error = function(e) {
-      showNotification("Error fetching administrative boundaries from GADM. Please try again in a few minutes.", type = "error")
-      message("Error fetching polygon data from GADM: ", e$message)
+      shinyjs::hide("loading")
+      showNotification("The UN Geoservice map is currently unavailable. Please try again in a few minutes.", type = "error")
+      message("Error fetching polygon data: ", e$message)
       return(NULL)  # Ensure the rest of the code does not execute
     })
       
-  })#observe event
+    })#observe event
 
       
   # Close the connection when the Shiny session ends
