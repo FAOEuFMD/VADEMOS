@@ -72,7 +72,7 @@ source("UIParts.R")
 ui <- fluidPage(
   # Use CSS file to customize the interface
   tags$head(
-    tags$title("VADEMOS"),  # Set the title of the web page
+    tags$title("VADEMOS | Vaccine Demand Estimation Model for Foot-and-Mouth Disease"),  # Set the title of the web page
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"), # color themes
     tags$link(rel="shortcut icon", href="FAVICON.png") # eufmd favicon
   ),
