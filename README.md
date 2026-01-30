@@ -123,6 +123,23 @@ Where:
 - `YVR/AVR`: Young/Adult stock vaccination requirements
 - `C(s,PCP)`: Coverage based on PCP stage
 
+## Styling and Design
+
+### FAO Official Color Palette
+VADEMOS adheres to the FAO's professional color scheme to ensure visual consistency with FAO digital platforms:
+
+| Color | Hex Code | Usage |
+|-------|----------|-------|
+| Dark Grey | `#545454` | Headers and text elements |
+| Light Grey | `#F2F2F2` | Secondary backgrounds and subtle accents |
+| White FAO | `#F7F8F9` | Main content backgrounds |
+| UN Blue | `#5792c9` | Links and interactive elements |
+| Caption Blue | `#1C4767` | Deeper blue accents and important headings |
+| Sage Green | `#75AD82` | Secondary accent for buttons, borders, highlights |
+| EuFMD Green | `#073f23` | Primary brand color (navbar, primary buttons) |
+
+This cohesive color system maintains accessibility and readability standards across the application.
+
 ## File Structure
 
 ```

@@ -1,29 +1,35 @@
 
 /* NavbarPage */
 .navbar, .navbar-default {
-    background-color: #073f23 !important; /* Header background color */
-    border-color: #073f23;
+    background-color: #F7F8F9 !important; /* White FAO background */
+    border-color: #F7F8F9;
+    border-bottom: 2px solid #d0d0d0 !important; /* Separator line under header */
+}
+
+/* Hide navbar tabs (empty tab labels) */
+.navbar-nav {
+    display: none !important;
 }
 
 /* Navbar brand styling */
 .navbar-default .navbar-brand {
-    color: white !important; /* Header text color */
+    color: #545454 !important; /* Dark Grey text */
     width: 560px; /* Space between the logo and the menu bar */
 }
 
 .navbar-default .navbar-brand:hover {
-    color: #16834c !important; /* Header text color on hover */
+    color: #073f23 !important; /* EuFMD Green on hover */
 }
 
 /* Navbar links styling */
 .navbar-default .navbar-nav > li > a {
-    color: white !important; /* Header text color */
+    color: #545454 !important; /* Dark Grey text */
     padding: 10px 10px; /* Increase padding to add space */
 }
 
 .navbar-default .navbar-nav > li > a:hover {
-    color: #e6e6e6 !important; /* Header text color on hover */
-    background-color: #073f23;
+    color: #073f23 !important; /* EuFMD Green on hover */
+    background-color: #F7F8F9;
     text-decoration: underline;
 }
 
@@ -31,8 +37,13 @@
 .navbar-default .navbar-nav > .active > a,
 .navbar-default .navbar-nav > .active > a:focus,
 .navbar-default .navbar-nav > .active > a:hover {
-    color: white !important;
-    background-color: #0b4b2b !important;
+    color: #073f23 !important;
+    background-color: #e6e6e6 !important;
+}
+
+/* Logo styling - make black */
+.navbar-brand img {
+    filter: brightness(0) saturate(100%) !important;
 }
 
 /* Remove white padding at the top and sides */
@@ -41,11 +52,12 @@ body {
     padding-left: 0 !important;
     padding-right: 0 !important;
     margin: 0 !important;
+    background-color: #F7F8F9 !important; /* White FAO background */
 }
 
 /* Increase padding for the navbar */
 .navbar {
-    padding: 15px 20px; /* Adjust as needed for more space */
+    padding: 25px 20px; /* Increased padding to move separator line down */
 }
 
 
@@ -64,13 +76,13 @@ body {
 /* Make the sidebar sticky */
 .sticky-sidebar {
     position: fixed;
-    top: 90px;               /* Stick it to the top */
-    bottom: 500px;
+    top: 140px;               /* Stick it to the top with more padding from header */
+    bottom: 0;
     width: 22%;              /* Set width as a percentage to make it responsive */
-    height: 66vh;            /* 80% of the viewport height */
+    height: calc(100vh - 300px); /* Account for header and footer */
     background-color: #F4F4F4;
     overflow-y: auto;
-    padding: 0 10px;         /* Balanced padding: 0 for top/bottom, 20px for left/right */
+    padding: 0 10px 20px 10px;  /* Added bottom padding */
     margin-left: 0px;       /* Add some space between the sidebar and the body */
     z-index: 1000;
 }
@@ -199,4 +211,18 @@ body {
 
 .shiny-notification-close {
     color: white !important;
+}
+
+/* Footer styling */
+#footer {
+    background-color: #545454 !important; /* Dark Grey background */
+    color: #F7F8F9 !important; /* White FAO text */
+}
+
+#footer a {
+    color: #F7F8F9 !important; /* White FAO links */
+}
+
+#footer a:hover {
+    color: #75AD82 !important; /* Sage Green on hover */
 }

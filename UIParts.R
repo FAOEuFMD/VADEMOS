@@ -20,7 +20,11 @@ tool <- function() {
     ), #SidebarPanel
       # Main panel for displaying modeling outputs --
     mainPanel( width = 9, 
-               h3('VADEMOS','Vaccine Demand Estimation tool- FMD', align= 'left'),
+               fluidRow(
+                 column(8, h3('VADEMOS','Vaccine Demand Estimation tool- FMD', align= 'left')),
+                 column(4, div(style = "text-align: right; margin-top: 15px;",
+                               actionButton("return_home", "Return Home", class = "btn-custom")))
+               ),
                conditionalPanel(
                  condition = "input.maintabset !== 'Results'",
                  p("At the bottom of each section there is a help button. Click on this to get additional support for the step of the tool you are using. This information will be displayed to the left of the screen.")
@@ -45,8 +49,8 @@ tool <- function() {
                             pickerInput(
                               inputId = "year_selected",
                               label = "Select Year",
-                              choices = c(2025,2026,2027,2028,2029,2030,2031,2032,2033),
-                              selected = 2025,
+                              choices = c(2026,2027,2028,2029,2030,2031,2032,2033),
+                              selected = 2026,
                               options = list(`actions-box` = TRUE,`style`="btn-custom"),
                               multiple = TRUE)
                             ),
@@ -270,9 +274,9 @@ tool <- function() {
                        column(12, br()),  # Space between the button and the text
                        column(12, conditionalPanel(
                          condition = "input.mapbutton > 0",  # Show text only after button is clicked
-                         div('Select area to view density, prophylactic and emergency vaccination', 
+                         div('Select area to view details', 
                          style = "text-align: left; 
-         background-color: #FFFFFF; font-weight: bold; color:black; font-size:150%")
+         background-color: #F7F8F9; font-weight: bold; color:black; font-size:150%")
                        ))
                      ),
                      

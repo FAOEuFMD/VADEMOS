@@ -1,20 +1,137 @@
+<!DOCTYPE html>
 <html>
-
 <head>
-    <img src="EU.png" height=50px style="float:left; padding-left:20px; padding-top:10px">
-    <br>
-    <br>
-    <br>
+    <style>
+        .footer-container {
+            padding: 30px 20px;
+            color: #F7F8F9;
+            background-color: #545454;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            flex: 1;
+        }
+        .footer-logo {
+            flex-shrink: 0;
+        }
+        .footer-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .footer-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #F7F8F9;
+        }
+        .footer-subtitle {
+            font-size: 14px;
+            color: #F7F8F9;
+        }
+        .footer-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+        .footer-links a {
+            color: #F7F8F9;
+            text-decoration: none;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        .footer-bottom {
+            width: 100%;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #8a8a8a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .footer-policy {
+            font-size: 12px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .footer-policy a {
+            color: #F7F8F9;
+            text-decoration: none;
+        }
+        .footer-policy a:hover {
+            text-decoration: underline;
+        }
+        .footer-divider {
+            color: #8a8a8a;
+        }
+        .footer-copyright {
+            font-size: 13px;
+            color: #F7F8F9;
+        }
+        @media (max-width: 768px) {
+            .footer-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .footer-left {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .footer-links {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
-<p style="text-align:left; padding-left:20px">European Commission for the Control of Foot-and-Mouth Disease <br>
-    FAST-HOLD strategy. Foot-and-mouth and similar transboundary animal diseases</p>
-
-<p style="text-align:left; padding-left:20px">www.fao.org/eufmd</p>
-
-<p style="text-align:left; padding-left:20px; padding-bottom:10px">© 2025 | FAO-EuFMD</p>
-
+    <div class="footer-container">
+        <div class="footer-left">
+            <div class="footer-logo">
+                <img src="EU.png" height="50px" alt="EU Logo">
+            </div>
+            <div class="footer-text">
+                <div class="footer-title">European Commission for the Control of Foot-and-Mouth Disease</div>
+                <div class="footer-subtitle">Food and Agriculture Organization of the United Nations</div>
+            </div>
+        </div>
+        
+        <div class="footer-links">
+            <a href="https://www.fao.org" target="_blank">FAO Website</a>
+            <a href="https://www.fao.org/eufmd" target="_blank">EuFMD Website</a>
+            <a href="https://forms.office.com/e/yAY1SsSJsk" target="_blank">Contact Us</a>
+        </div>
+        
+        <div class="footer-bottom">
+            <div class="footer-policy">
+                <a href="https://www.fao.org/contact-us/terms/en/" target="_blank">Terms and Conditions</a>
+                <span class="footer-divider">|</span>
+                <a href="https://fao.org/contact-us/data-protection-and-privacy/en/" target="_blank">Data Protection and Privacy</a>
+                <span class="footer-divider">|</span>
+                <a href="https://www.fao.org/contact-us/scam-alert/en/" target="_blank">Scam Alert</a>
+            </div>
+            
+            <div class="footer-copyright">
+                © <script>document.write(new Date().getFullYear())</script> FAO EuFMD - European Commission for the Control of Foot-and-Mouth Disease
+            </div>
+        </div>
+    </div>
 </body>
 </html>

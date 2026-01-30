@@ -85,15 +85,15 @@ ui <- fluidPage(
   navbarPage(
              id = "main_navbar",  # Add an ID to the navbarPage
              title = div(img(src = 'EuFMD_2023_white.png',
-                             style = "margin: -20px 0 0 0; padding: 0;", height = 70),
+                             style = "margin: -20px 0 20px 0; padding: 0;", height = 85),
                          style = "display: flex; align-items: left;"  ),
    
-             # NAVBAR TAB PANEL 1 - ABOUT PAGE
-             tabPanel("About",
-                      style = "text-align: justify; margin-left: 20px; margin-right: 20px;",
+             # Hidden tabs that will show main content
+             tabPanel("",
+                      
                       
                       # Buttons at the top for navigation
-                      div(
+                      div(style = "margin-top: 30px;",
                         actionButton("sum", "Summary", class = "btn-custom"),          # Button for Summary
                         actionButton("param", "Parameters", class = "btn-custom"),     # Button for Parameters
                         actionButton("math", "Mathematical Models", class = "btn-custom"),  # Button for Mathematical Models     
@@ -129,30 +129,11 @@ ui <- fluidPage(
              
              
              
-             # ----------------------------------
-             # NAVBAR TAB PANEL 2 - TOOL PAGE 
-             tabPanel("Tool",
+             # Tool content shown by default
+             tabPanel("",  # Empty title to hide tab
+                      value = "tool_panel",
                       tool <- div(class = "vademos", tool())
-                      ),
-              
-             tabPanel("Contact",
-                      div(id = "contactpage", 
-                          style = "width: 100%; max-width: 100%; margin: 0 auto; padding: 20px;",
-                          tags$iframe(
-                            width = "1000px", 
-                            height = "500px", 
-                            src = "https://forms.office.com/e/yAY1SsSJsk?embed=true", 
-                            frameborder = "0", 
-                            marginwidth = "0", 
-                            marginheight = "0", 
-                            style = "border: none; max-width:100%; max-height:100vh", 
-                            allowfullscreen = NA, 
-                            webkitallowfullscreen = NA, 
-                            mozallowfullscreen = NA, 
-                            msallowfullscreen = NA
-                          )
                       )
-             )
 
             ), # navbar
         
@@ -161,7 +142,6 @@ ui <- fluidPage(
         # FOOTER
         div(id='footer',
             class = "footer",
-            style = "background-color: #073f23; color: white;",
             includeHTML("www/footer.html")
         ) # div=footer
         
@@ -386,7 +366,11 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$go_to_tool, {
-    updateTabsetPanel(session, "main_navbar", selected = "Tool")
+    updateTabsetPanel(session, "main_navbar", selected = "tool_panel")
+  })
+  
+  observeEvent(input$return_home, {
+    session$reload()
   })
  
 #################STEP1##########################  
@@ -1126,6 +1110,7 @@ server <- function(input, output, session) {
   ########################
   
   shared_results <- reactiveVal(NULL)  # Store results data
+  shared_expanded_data <- reactiveVal(NULL)  # Store expanded data for full table
   
   
   # Observer triggered when the "resultsbutton" is pressed
@@ -1201,7 +1186,8 @@ server <- function(input, output, session) {
       merged <- merge(results_with_iso, density_data, by.x = "ISO3CD", by.y = "GID_0")
     
     # Create expanded data for each species with proper density mapping
-    expanded_data <- data.frame()
+    # Pre-allocate list for better memory efficiency
+    expanded_list <- vector("list", nrow(merged))
     
     for (i in seq_len(nrow(merged))) {
       row_data <- merged[i, ]
@@ -1230,8 +1216,13 @@ server <- function(input, output, session) {
       row_data$Density <- density_col
       row_data$head_km2 <- head_km2_col
       
-      expanded_data <- rbind(expanded_data, row_data)
+      expanded_list[[i]] <- row_data
     }
+    
+    # Combine all rows at once (much more memory efficient than rbind in loop)
+    expanded_data <- do.call(rbind, expanded_list)
+    rm(expanded_list, merged)
+    gc()
     
     # Calculate vaccine requirements using the expanded data
     expanded_data <- expanded_data %>% 
@@ -1242,6 +1233,9 @@ server <- function(input, output, session) {
               Emergency_Youngstock = round(Area_km2 * head_km2 * `Youngstock Proportion (%)` / 100 * `Youngstock Schedule` * `Emergency Coverage (%)` / 100, 0),
               Emergency_Adult = round(Area_km2 * head_km2 * `Adult Proportion (%)` / 100 * `Adult Schedule` * `Emergency Coverage (%)` / 100, 0),
               Emergency_Vaccination = Emergency_Youngstock + Emergency_Adult)
+
+    # Store expanded_data in reactive value for full table access
+    shared_expanded_data(expanded_data)
 
     # Collapse by GID_1, Country, Specie (using the administrative ID and species from results)
     merged_summary <- expanded_data %>%
@@ -1297,24 +1291,30 @@ server <- function(input, output, session) {
       }
       
       # Read shapefiles directly from disk (no memory cache)
+      # Process countries one at a time to minimize memory footprint
       message("Reading shapefiles from disk cache...")
-      sf_data_list <- lapply(selected_countries, function(country) {
+      sf_data <- NULL
+      
+      for (country in selected_countries) {
         cache_file <- file.path(cache_dir, paste0(country, "_adm1.rds"))
-        readRDS(cache_file)
-      })
+        country_sf <- readRDS(cache_file)
+        
+        # Simplify geometry immediately after loading
+        country_sf <- sf::st_simplify(country_sf, preserveTopology = TRUE, dTolerance = 0.01)
+        
+        # Combine with accumulated data
+        if (is.null(sf_data)) {
+          sf_data <- country_sf
+        } else {
+          sf_data <- rbind(sf_data, country_sf)
+        }
+        
+        # Clean up country data immediately
+        rm(country_sf)
+        gc()
+      }
       
-      # Combine into one sf object
-      sf_data <- do.call(rbind, sf_data_list)
-      
-      # Free the list immediately
-      rm(sf_data_list)
-      gc()
-      
-      # Simplify polygon geometry to speed up rendering
-      message("Simplifying polygon geometry for faster rendering...")
-      sf_data <- sf_data %>%
-        sf::st_simplify(preserveTopology = TRUE, dTolerance = 0.01)
-      message("Geometry simplified successfully")
+      message("All shapefiles loaded and simplified successfully")
       # Keep original GADM column names (GID_0, NAME_1, GID_1)
       # Filter the sf_data based on selected countries (using ISO3 codes)
       sf_data <- sf_data %>% filter(GID_0 %in% selected_countries)
@@ -1326,6 +1326,10 @@ server <- function(input, output, session) {
       
       # Merge sf_data (polygon data) with expanded_data (density and vaccine requirement) on GID_1
       merged_sf_data <- merge(sf_data, expanded_data, by = "GID_1", all.x = TRUE)
+      
+      # Clean up large objects immediately after merge
+      rm(sf_data, expanded_data)
+      gc()
       
       # Print the merged data for debugging purposes
       print(merged_sf_data)
@@ -1361,7 +1365,7 @@ server <- function(input, output, session) {
           
           
           # Add a legend to represent density-based coloring
-          addLegend(pal = palette, values = merged_sf_data$Density, opacity = 0.7, title = "Density", position = "bottomright")
+          addLegend(pal = palette, values = merged_sf_data$Density, opacity = 0.7, title = "National Herd Proportion (%)", position = "bottomright")
       }) #map output
       
       # Reactive value to store the selected area
@@ -1390,8 +1394,8 @@ server <- function(input, output, session) {
               tags$tr(tags$th("Specie"), tags$td(filtered_data$Specie[i])),
               tags$tr(tags$th("Administrative Area"), tags$td(filtered_data$NAME_1[i])),
               tags$tr(tags$th("GID_1"), tags$td(filtered_data$GID_1[i])),
-              tags$tr(tags$th("Density"), tags$td(filtered_data$Density[i])),
-              tags$tr(tags$th("Head_km2"), tags$td(filtered_data$head_km2[i])),
+              tags$tr(tags$th("National Herd Proportion (%)"), tags$td(filtered_data$Density[i])),
+              tags$tr(tags$th("Density (head/km²)"), tags$td(filtered_data$head_km2[i])),
               tags$tr(tags$th("Prophylactic Vaccination (doses)"), tags$td(HTML(filtered_data$Prophylactic_Vaccination[i]))),
               tags$tr(tags$th("Emergency Vaccination (doses)"), tags$td(HTML(filtered_data$Emergency_Vaccination[i]))),
               tags$tr(tags$td(colspan = 2, style = "color: #888; font-size: 12px; padding-top: 8px;",
@@ -1416,6 +1420,10 @@ server <- function(input, output, session) {
       
       # Observe full table button and map display
       observeEvent(input$fulltablebutton, {
+        # Get expanded data from reactive value
+        expanded_data <- shared_expanded_data()
+        req(expanded_data)
+        
         # Reshape expanded_data to wide format for years, using consistent column names
         library(tidyr)
         library(dplyr)
