@@ -84,16 +84,17 @@ ui <- fluidPage(
   
   navbarPage(
              id = "main_navbar",  # Add an ID to the navbarPage
-             title = div(img(src = 'EuFMD_2023_white.png',
-                             style = "margin: -20px 0 20px 0; padding: 0;", height = 85),
-                         style = "display: flex; align-items: left;"  ),
+             title = div(img(src = 'FAO.png',
+                             style = "margin: 0; padding: 0; display: block; max-width: 100%;", height = 100),
+                         style = "display: flex; align-items: center;"  ),
    
              # Hidden tabs that will show main content
              tabPanel("",
                       
                       
                       # Buttons at the top for navigation
-                      div(style = "margin-top: 30px;",
+                      div(style = "margin-top: 30px; display: flex; align-items: center; gap: 20px;",
+                        img(src = 'EuFMD2.png', height = 95, style = "filter: brightness(0) saturate(100%);"),
                         actionButton("sum", "Summary", class = "btn-custom"),          # Button for Summary
                         actionButton("param", "Parameters", class = "btn-custom"),     # Button for Parameters
                         actionButton("math", "Mathematical Models", class = "btn-custom"),  # Button for Mathematical Models     

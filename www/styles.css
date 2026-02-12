@@ -57,7 +57,18 @@ body {
 
 /* Increase padding for the navbar */
 .navbar {
-    padding: 25px 20px; /* Increased padding to move separator line down */
+    padding: 10px 20px 10px 20px; /* Top, Right, Bottom, Left - space for logo */
+    min-height: 120px; /* Ensure enough space for logo */
+}
+
+/* Make navbar responsive */
+@media (max-width: 768px) {
+    .navbar {
+        min-height: 100px;
+    }
+    .navbar-brand img {
+        height: 80px !important;
+    }
 }
 
 

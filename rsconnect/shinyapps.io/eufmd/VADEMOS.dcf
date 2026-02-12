@@ -5,7 +5,7 @@ account: eufmd
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 12571538
-bundleId: 11511412
+bundleId: 11572276
 url: https://eufmd.shinyapps.io/VADEMOS/
 version: 1
 asMultiple: FALSE
