@@ -83,10 +83,8 @@ ui <- fluidPage(
   
   
   navbarPage(
-             id = "main_navbar",  # Add an ID to the navbarPage
-             title = div(img(src = 'FAO.png',
-                             style = "margin: 0; padding: 0; display: block; max-width: 100%;", height = 100),
-                         style = "display: flex; align-items: center;"  ),
+             id = "main_navbar",
+             title = div(img(src = 'FAO.png', style = "margin: 0; padding: 0; display: block; max-width: 100%;", height = 100), span("VADEMOS Vaccine Demand Estimation tool - FMD", style = "margin-left: 20px; font-weight: bold; color: #545454; font-size: 24px; display: flex; align-items: center; white-space: nowrap;"), style = "display: flex; align-items: center;"),
    
              # Hidden tabs that will show main content
              tabPanel("",

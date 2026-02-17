@@ -16,7 +16,10 @@ tool <- function() {
                  style="text-align: justify;",
                  uiOutput("help_content")
         ) #tabpanel
-    )  #tabsetpanel
+    ),  #tabsetpanel
+      div(style = "text-align: left; margin-top: 20px; margin-left: -15px;",
+          img(src = 'EuFMD2.png', height = 80, style = "filter: brightness(0) saturate(100%); margin: 0; padding: 0;")
+      )
     ), #SidebarPanel
       # Main panel for displaying modeling outputs --
     mainPanel( width = 9, 
