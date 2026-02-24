@@ -1,3 +1,7 @@
+/* Force help box FAO Statistical Database Terms of Use link to black */
+a[href="https://www.fao.org/contact-us/terms/db-terms-of-use/en"] {
+    color: #000 !important;
+}
 /* Force all .box and .step-box backgrounds to white for tool section */
 .box, .step-box {
     background: #fff !important;

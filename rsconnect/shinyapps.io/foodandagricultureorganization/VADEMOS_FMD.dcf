@@ -5,7 +5,7 @@ account: foodandagricultureorganization
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 16710953
-bundleId: 11602095
+bundleId: 11624917
 url: https://foodandagricultureorganization.shinyapps.io/VADEMOS_FMD/
 version: 1
 asMultiple: FALSE
