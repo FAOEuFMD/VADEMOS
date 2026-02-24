@@ -74,7 +74,8 @@ ui <- fluidPage(
   tags$head(
     tags$title("VADEMOS | Vaccine Demand Estimation Model for Foot-and-Mouth Disease"),  # Set the title of the web page
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"), # color themes
-    tags$link(rel="shortcut icon", href="FAVICON.png") # eufmd favicon
+    tags$link(rel="shortcut icon", href="FAVICON.png"), # eufmd favicon
+    tags$style(HTML('.vademos-title { color: #000000 !important; font-family: "Lato", Arial, Helvetica, sans-serif !important; }'))
   ),
   theme = shinytheme("united"), # basic shiny theme
   chooseSliderSkin(skin="Flat", color="#073f23"), # to avoid sliderInput's blue color
@@ -84,7 +85,7 @@ ui <- fluidPage(
   
   navbarPage(
              id = "main_navbar",
-             title = div(img(src = 'FAO.png', style = "margin: 0; padding: 0; display: block; max-width: 100%;", height = 100), span("VADEMOS Vaccine Demand Estimation tool - FMD", style = "margin-left: 20px; font-weight: bold; color: #545454; font-size: 24px; display: flex; align-items: center; white-space: nowrap;"), style = "display: flex; align-items: center;"),
+             title = div(img(src = 'FAO.png', style = "margin: 0; padding: 0; display: block; max-width: 100%;", height = 100), span("VADEMOS Vaccine Demand Estimation tool for foot-and-mouth disease (FMD)", style = "margin-left: 20px; font-weight: bold; color: #110101; font-size: 24px; display: flex; align-items: center; white-space: nowrap;"), style = "display: flex; align-items: center;"),
    
              # Hidden tabs that will show main content
              tabPanel("",
@@ -92,7 +93,7 @@ ui <- fluidPage(
                       
                       # Buttons at the top for navigation
                       div(style = "margin-top: 30px; display: flex; align-items: center; gap: 20px;",
-                        img(src = 'EuFMD2.png', height = 95, style = "filter: brightness(0) saturate(100%);"),
+                        img(src = 'EuFMD_2023_white.png', height = 60, style = "filter: brightness(0) saturate(100%);"),
                         actionButton("sum", "Summary", class = "btn-custom"),          # Button for Summary
                         actionButton("param", "Parameters", class = "btn-custom"),     # Button for Parameters
                         actionButton("math", "Mathematical Models", class = "btn-custom"),  # Button for Mathematical Models     

@@ -1,0 +1,13 @@
+name: VADEMOS_FMD
+title: VADEMOS_FMD
+username: foodandagricultureorganization
+account: foodandagricultureorganization
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16710953
+bundleId: 11602095
+url: https://foodandagricultureorganization.shinyapps.io/VADEMOS_FMD/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .github/copilot-instructions.md

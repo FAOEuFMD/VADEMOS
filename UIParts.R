@@ -17,9 +17,9 @@ tool <- function() {
                  uiOutput("help_content")
         ) #tabpanel
     ),  #tabsetpanel
-      div(style = "text-align: left; margin-top: 20px; margin-left: -15px;",
-          img(src = 'EuFMD2.png', height = 80, style = "filter: brightness(0) saturate(100%); margin: 0; padding: 0;")
-      )
+            div(style = "text-align: left; margin-top: 20px; margin-left: -15px;",
+              img(src = 'EuFMD_2023_white.png', height = 60, style = "filter: brightness(0) saturate(100%); margin: 0; padding: 0;")
+            )
     ), #SidebarPanel
       # Main panel for displaying modeling outputs --
     mainPanel( width = 9, 
@@ -265,8 +265,7 @@ tool <- function() {
                  fluidRow( div(id= "results",
                      column(12, br()),
                      div('Result table for prophylactic vaccine dose estimation', 
-                     style = "text-align: center; background-color: #FFFFFF; font-weight: bold; 
-                     color:black; font-size:150%"),
+                     style = "text-align: center; font-weight: bold; color:black; font-size:150%"),
                      column(12, dataTableOutput("resultstable")%>% withSpinner(type = 5), style = "font-size:102"),
                      # Button and conditional text layout
                      fluidRow(
@@ -287,10 +286,10 @@ tool <- function() {
                      column(7, 
                             leafletOutput("worldmap"),
                             div(' "The boundaries and names shown and the designations used on this map do not 
-          imply the expression of any opinion whatsoever on the part of FAO concerning the 
-          legal status of any country, territory, city or area or of its authorities, 
-          or concerning the delimitation of its frontiers and boundaries" ', 
-                                style = "text-align: center; background-color: #FFFFFF; font-weight: italic;                                              color:black; font-size:80%")
+                    imply the expression of any opinion whatsoever on the part of FAO concerning the 
+                    legal status of any country, territory, city or area or of its authorities, 
+                    or concerning the delimitation of its frontiers and boundaries" ', 
+                              style = "text-align: center; font-weight: italic; color:black; font-size:80%")
                      ),
                      column(5, uiOutput("detailstable")),
                      #column(4, dataTableOutput("detailstable")),

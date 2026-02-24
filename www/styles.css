@@ -1,3 +1,7 @@
+/* Force all .box and .step-box backgrounds to white for tool section */
+.box, .step-box {
+    background: #fff !important;
+}
 
 /* NavbarPage */
 .navbar, .navbar-default {
@@ -91,7 +95,7 @@ body {
     bottom: 0;
     width: 22%;              /* Set width as a percentage to make it responsive */
     height: calc(100vh - 300px); /* Account for header and footer */
-    background-color: #F4F4F4;
+    background-color: #fff;
     overflow-y: auto;
     padding: 0 10px 20px 10px;  /* Added bottom padding */
     margin-left: 0px;       /* Add some space between the sidebar and the body */
@@ -103,6 +107,7 @@ body {
     .sticky-sidebar {
         width: 25%;          /* Increase width slightly for smaller screens */
         padding: 0 10px;     /* Adjust padding for smaller screens */
+        background-color: #fff;
     }
 }
 
@@ -115,13 +120,17 @@ body {
         padding: 0 10px;      /* Reduce padding on small screens */
         z-index: 100;         /* Lower z-index to ensure it doesn't overlap */
         margin: 10px 0;       /* Add some space below the sidebar */
+        background-color: #fff;
     }
 }
 
 
 
-/* Input widgets */
-/* sldier ok ,  has been dealt within the app.R using 'chooseSliderskin' function */
+
+/* Make wellPanel (steps boxes) background white */
+.well, .well-panel, .wellPanel, .panel, .panel-default, .panel-body {
+    background-color: #fff !important;
+}
 
 .btn-custom {
         background-color: white !important;   /* Background color */
